@@ -9,6 +9,14 @@ struct ExternalVolume: Identifiable, Equatable, Hashable, Sendable {
     let availableCapacity: Int64
     let mountPoint: URL
 
+    var parentWholeDisk: String {
+        deviceIdentifier.replacingOccurrences(
+            of: "s\\d+$",
+            with: "",
+            options: .regularExpression
+        )
+    }
+
     var formattedCapacity: String {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file

@@ -7,11 +7,18 @@ final class AppViewModel {
     private(set) var volumes: [ExternalVolume] = []
     var selectedVolume: ExternalVolume?
     private(set) var isLoading = false
+    private(set) var isScanning = false
+    private(set) var processGroups: [ProcessGroup] = []
 
     private let volumeMonitorService: VolumeMonitorService
+    private let processScanner: ProcessScanning
 
-    init(volumeMonitorService: VolumeMonitorService) {
+    init(
+        volumeMonitorService: VolumeMonitorService,
+        processScanner: ProcessScanning? = nil
+    ) {
         self.volumeMonitorService = volumeMonitorService
+        self.processScanner = processScanner ?? ProcessScannerService(shell: ShellExecutor())
     }
 
     func startMonitoring() async {
@@ -36,5 +43,16 @@ final class AppViewModel {
 
     func deselectVolume() {
         selectedVolume = nil
+        processGroups = []
+    }
+
+    func scanProcesses(for volume: ExternalVolume) async {
+        isScanning = true
+        do {
+            processGroups = try await processScanner.scanProcesses(for: volume)
+        } catch {
+            processGroups = []
+        }
+        isScanning = false
     }
 }

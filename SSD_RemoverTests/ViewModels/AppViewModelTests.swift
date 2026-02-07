@@ -138,4 +138,82 @@ struct AppViewModelTests {
         await vm.refreshVolumes()
         #expect(vm.isLoading == false)
     }
+
+    // MARK: - Process Scanning Tests
+
+    @Test("scanProcesses로 프로세스 그룹 업데이트")
+    @MainActor
+    func scanProcessesUpdatesGroups() async {
+        let (_, _, service) = makeMockService()
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedResult = [
+            ProcessGroup(
+                category: .user,
+                processes: [
+                    BlockingProcess(pid: 100, command: "vim", user: "testuser", uid: 501, lockedFiles: ["/Volumes/TestDrive/file.txt"])
+                ]
+            )
+        ]
+
+        let vm = AppViewModel(volumeMonitorService: service, processScanner: mockScanner)
+        let volume = makeSampleVolume()
+
+        await vm.scanProcesses(for: volume)
+
+        #expect(vm.processGroups.count == 1)
+        #expect(vm.processGroups[0].category == .user)
+        #expect(vm.isScanning == false)
+    }
+
+    @Test("scanProcesses 에러 시 빈 그룹")
+    @MainActor
+    func scanProcessesErrorClearsGroups() async {
+        let (_, _, service) = makeMockService()
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedError = ShellError.executionFailed(exitCode: 1, stderr: "error")
+
+        let vm = AppViewModel(volumeMonitorService: service, processScanner: mockScanner)
+        let volume = makeSampleVolume()
+
+        await vm.scanProcesses(for: volume)
+
+        #expect(vm.processGroups.isEmpty)
+        #expect(vm.isScanning == false)
+    }
+
+    @Test("deselectVolume은 processGroups 초기화")
+    @MainActor
+    func deselectClearsProcessGroups() async {
+        let (_, _, service) = makeMockService()
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedResult = [
+            ProcessGroup(
+                category: .user,
+                processes: [
+                    BlockingProcess(pid: 100, command: "vim", user: "testuser", uid: 501, lockedFiles: [])
+                ]
+            )
+        ]
+
+        let vm = AppViewModel(volumeMonitorService: service, processScanner: mockScanner)
+        let volume = makeSampleVolume()
+
+        await vm.scanProcesses(for: volume)
+        #expect(!vm.processGroups.isEmpty)
+
+        vm.deselectVolume()
+        #expect(vm.processGroups.isEmpty)
+    }
+}
+
+// MARK: - MockProcessScanner
+
+private final class MockProcessScanner: ProcessScanning, @unchecked Sendable {
+    var stubbedResult: [ProcessGroup] = []
+    var stubbedError: Error?
+
+    func scanProcesses(for volume: ExternalVolume) async throws -> [ProcessGroup] {
+        if let error = stubbedError { throw error }
+        return stubbedResult
+    }
 }

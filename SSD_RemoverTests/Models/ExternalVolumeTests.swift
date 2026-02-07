@@ -89,6 +89,39 @@ struct ExternalVolumeTests {
         #expect(formatted.contains("1.5") || formatted.contains("1,5"))
     }
 
+    @Test("parentWholeDisk - 파티션 번호 제거")
+    func parentWholeDiskPartition() {
+        let url = URL(fileURLWithPath: "/Volumes/Drive")
+        let volume = ExternalVolume(
+            id: url, name: "Drive", deviceIdentifier: "disk4s1",
+            fileSystem: "APFS", totalCapacity: 100, availableCapacity: 50, mountPoint: url
+        )
+
+        #expect(volume.parentWholeDisk == "disk4")
+    }
+
+    @Test("parentWholeDisk - 이미 whole disk")
+    func parentWholeDiskAlreadyWhole() {
+        let url = URL(fileURLWithPath: "/Volumes/Drive")
+        let volume = ExternalVolume(
+            id: url, name: "Drive", deviceIdentifier: "disk4",
+            fileSystem: "APFS", totalCapacity: 100, availableCapacity: 50, mountPoint: url
+        )
+
+        #expect(volume.parentWholeDisk == "disk4")
+    }
+
+    @Test("parentWholeDisk - 다중 자릿수 파티션")
+    func parentWholeDiskMultiDigitPartition() {
+        let url = URL(fileURLWithPath: "/Volumes/Drive")
+        let volume = ExternalVolume(
+            id: url, name: "Drive", deviceIdentifier: "disk10s12",
+            fileSystem: "APFS", totalCapacity: 100, availableCapacity: 50, mountPoint: url
+        )
+
+        #expect(volume.parentWholeDisk == "disk10")
+    }
+
     @Test("Hashable - Set에 저장 가능")
     func hashableConformance() {
         let url1 = URL(fileURLWithPath: "/Volumes/Drive1")
