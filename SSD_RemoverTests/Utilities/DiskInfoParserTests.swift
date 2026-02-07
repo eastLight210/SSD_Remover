@@ -218,4 +218,124 @@ struct DiskInfoParserTests {
         #expect(result.mountPoint == "/Volumes/삼성 T7 외장")
         #expect(result.volumeName == "삼성 T7 외장")
     }
+
+    // MARK: - APFS FreeSpace Fallback Tests
+
+    @Test("APFS FreeSpace=0일 때 APFSContainerFree를 폴백으로 사용")
+    func apfsFreeSpaceZeroFallsBackToContainerFree() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/TestSSD</string>
+            <key>VolumeName</key><string>TestSSD</string>
+            <key>FilesystemName</key><string>APFS</string>
+            <key>TotalSize</key><integer>1000000000000</integer>
+            <key>FreeSpace</key><integer>0</integer>
+            <key>APFSContainerFree</key><integer>250000000000</integer>
+        </dict>
+        </plist>
+        """
+        let result = try DiskInfoParser.parse(plistString: plist)
+        #expect(result.freeSpace == 250_000_000_000)
+    }
+
+    @Test("APFS FreeSpace=0이고 APFSContainerFree도 없으면 freeSpace는 0")
+    func apfsFreeSpaceZeroNoContainerFreeReturnsZero() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/TestSSD</string>
+            <key>VolumeName</key><string>TestSSD</string>
+            <key>TotalSize</key><integer>1000000000000</integer>
+            <key>FreeSpace</key><integer>0</integer>
+        </dict>
+        </plist>
+        """
+        let result = try DiskInfoParser.parse(plistString: plist)
+        #expect(result.freeSpace == 0)
+    }
+
+    @Test("FreeSpace가 정상 값이면 APFSContainerFree 무시")
+    func normalFreeSpaceIgnoresContainerFree() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/TestSSD</string>
+            <key>VolumeName</key><string>TestSSD</string>
+            <key>TotalSize</key><integer>1000000000000</integer>
+            <key>FreeSpace</key><integer>500000000000</integer>
+            <key>APFSContainerFree</key><integer>250000000000</integer>
+        </dict>
+        </plist>
+        """
+        let result = try DiskInfoParser.parse(plistString: plist)
+        #expect(result.freeSpace == 500_000_000_000)
+    }
+
+    @Test("FreeSpace 키 없으면 APFSContainerFree 폴백")
+    func missingFreeSpaceFallsBackToContainerFree() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/TestSSD</string>
+            <key>VolumeName</key><string>TestSSD</string>
+            <key>TotalSize</key><integer>1000000000000</integer>
+            <key>APFSContainerFree</key><integer>300000000000</integer>
+        </dict>
+        </plist>
+        """
+        let result = try DiskInfoParser.parse(plistString: plist)
+        #expect(result.freeSpace == 300_000_000_000)
+    }
+
+    @Test("FreeSpace와 APFSContainerFree 둘 다 없으면 에러")
+    func noFreeSpaceFieldsThrows() {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/TestSSD</string>
+            <key>VolumeName</key><string>TestSSD</string>
+            <key>TotalSize</key><integer>1000000000000</integer>
+        </dict>
+        </plist>
+        """
+        #expect(throws: DiskInfoParserError.self) {
+            _ = try DiskInfoParser.parse(plistString: plist)
+        }
+    }
+
+    @Test("FreeSpace=0이고 APFSContainerFree=0이면 freeSpace는 0")
+    func apfsFreeSpaceZeroContainerFreeZeroReturnsZero() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/TestSSD</string>
+            <key>VolumeName</key><string>TestSSD</string>
+            <key>TotalSize</key><integer>1000000000000</integer>
+            <key>FreeSpace</key><integer>0</integer>
+            <key>APFSContainerFree</key><integer>0</integer>
+        </dict>
+        </plist>
+        """
+        let result = try DiskInfoParser.parse(plistString: plist)
+        #expect(result.freeSpace == 0)
+    }
 }

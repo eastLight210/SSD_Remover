@@ -33,7 +33,7 @@ struct ProcessScannerServiceTests {
 
         #expect(shell.executedCommands.count == 1)
         #expect(shell.executedCommands[0].command == "/usr/sbin/lsof")
-        #expect(shell.executedCommands[0].arguments == ["-F", "pcuLn", "+D", "/Volumes/TestSSD"])
+        #expect(shell.executedCommands[0].arguments == ["-F", "pcuLn", "+f", "--", "/Volumes/TestSSD"])
     }
 
     @Test("lsof 출력을 파싱하여 ProcessGroup으로 반환한다")
@@ -95,7 +95,57 @@ struct ProcessScannerServiceTests {
     @Test("shell 에러를 전파한다")
     func propagatesShellError() async throws {
         let (service, shell) = makeSUT()
-        shell.stubbedError = ShellError.executionFailed(exitCode: 1, stderr: "lsof failed")
+        shell.stubbedError = ShellError.executionFailed(exitCode: 2, stderr: "lsof failed")
+        let volume = makeVolume()
+
+        await #expect(throws: ShellError.self) {
+            _ = try await service.scanProcesses(for: volume)
+        }
+    }
+
+    // MARK: - Volume-scoped lsof Tests
+
+    @Test("lsof에 볼륨 마운트 포인트 인자가 전달된다")
+    func executesLsofWithVolumeMountPoint() async throws {
+        let (service, shell) = makeSUT()
+        shell.stubbedResult = ""
+        let volume = makeVolume()
+
+        _ = try await service.scanProcesses(for: volume)
+
+        #expect(shell.executedCommands.count == 1)
+        #expect(shell.executedCommands[0].command == "/usr/sbin/lsof")
+        #expect(shell.executedCommands[0].arguments == ["-F", "pcuLn", "+f", "--", "/Volumes/TestSSD"])
+    }
+
+    @Test("공백/한글 포함 마운트 포인트도 lsof 인자에 올바르게 전달")
+    func executesLsofWithSpecialCharacterMountPoint() async throws {
+        let (service, shell) = makeSUT()
+        shell.stubbedResult = ""
+        let volume = makeVolume(name: "삼성 T7", mountPath: "/Volumes/삼성 T7")
+
+        _ = try await service.scanProcesses(for: volume)
+
+        #expect(shell.executedCommands[0].arguments == ["-F", "pcuLn", "+f", "--", "/Volumes/삼성 T7"])
+    }
+
+    // MARK: - lsof Exit Code Handling Tests
+
+    @Test("lsof exit code 1 (결과 없음) → 빈 배열 반환")
+    func lsofExitCode1ReturnsEmptyArray() async throws {
+        let (service, shell) = makeSUT()
+        shell.stubbedError = ShellError.executionFailed(exitCode: 1, stderr: "")
+        let volume = makeVolume()
+
+        let groups = try await service.scanProcesses(for: volume)
+
+        #expect(groups.isEmpty)
+    }
+
+    @Test("lsof exit code 2 이상은 에러 전파")
+    func lsofExitCode2OrHigherThrows() async throws {
+        let (service, shell) = makeSUT()
+        shell.stubbedError = ShellError.executionFailed(exitCode: 2, stderr: "permission denied")
         let volume = makeVolume()
 
         await #expect(throws: ShellError.self) {

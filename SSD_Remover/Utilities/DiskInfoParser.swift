@@ -47,7 +47,16 @@ enum DiskInfoParser {
         guard let totalSize = plist["TotalSize"] as? Int64 else {
             throw DiskInfoParserError.missingRequiredField("TotalSize")
         }
-        guard let freeSpace = plist["FreeSpace"] as? Int64 else {
+
+        let freeSpace: Int64
+        if let fs = plist["FreeSpace"] as? Int64, fs > 0 {
+            freeSpace = fs
+        } else if let containerFree = plist["APFSContainerFree"] as? Int64 {
+            freeSpace = containerFree
+        } else if let fs = plist["FreeSpace"] as? Int64 {
+            // FreeSpace=0이고 APFSContainerFree도 없는 경우 (정말 꽉 찬 디스크)
+            freeSpace = fs
+        } else {
             throw DiskInfoParserError.missingRequiredField("FreeSpace")
         }
 
