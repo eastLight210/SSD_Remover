@@ -13,6 +13,7 @@ enum EjectPhase: Equatable, Sendable {
 final class EjectViewModel {
     private(set) var phase: EjectPhase = .confirming
     private(set) var processGroups: [ProcessGroup] = []
+    private(set) var failedTerminations: [Int32: String] = [:]
 
     let volume: ExternalVolume
     private let processTerminator: ProcessTerminating
@@ -48,13 +49,17 @@ final class EjectViewModel {
     func terminateAndEject(gracePeriod: TimeInterval = 3.0) async {
         let targets = selectedProcesses
         let total = targets.count
+        failedTerminations = [:]
 
         if total > 0 {
             phase = .terminatingProcesses(completed: 0, total: total)
 
             var completed = 0
             for process in targets {
-                _ = await processTerminator.terminate(process: process, gracePeriod: gracePeriod)
+                let result = await processTerminator.terminate(process: process, gracePeriod: gracePeriod)
+                if case .failed(let message) = result {
+                    failedTerminations[process.pid] = message
+                }
                 completed += 1
                 phase = .terminatingProcesses(completed: completed, total: total)
             }
@@ -69,5 +74,10 @@ final class EjectViewModel {
         case .failed(let message):
             phase = .failure(message)
         }
+    }
+
+    /// failure 상태에서 전체 흐름을 재실행
+    func retry(gracePeriod: TimeInterval = 3.0) async {
+        await terminateAndEject(gracePeriod: gracePeriod)
     }
 }

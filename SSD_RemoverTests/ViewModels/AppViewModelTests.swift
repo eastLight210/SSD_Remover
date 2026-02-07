@@ -204,16 +204,22 @@ struct AppViewModelTests {
         vm.deselectVolume()
         #expect(vm.processGroups.isEmpty)
     }
-}
 
-// MARK: - MockProcessScanner
+    // MARK: - Edge Case Tests
 
-private final class MockProcessScanner: ProcessScanning, @unchecked Sendable {
-    var stubbedResult: [ProcessGroup] = []
-    var stubbedError: Error?
+    @Test("scanProcesses - launchFailed 에러도 빈 그룹 처리")
+    @MainActor
+    func scanProcessesLaunchFailedError() async {
+        let (_, _, service) = makeMockService()
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedError = ShellError.launchFailed("lsof not found")
 
-    func scanProcesses(for volume: ExternalVolume) async throws -> [ProcessGroup] {
-        if let error = stubbedError { throw error }
-        return stubbedResult
+        let vm = AppViewModel(volumeMonitorService: service, processScanner: mockScanner)
+        let volume = makeSampleVolume()
+
+        await vm.scanProcesses(for: volume)
+
+        #expect(vm.processGroups.isEmpty)
+        #expect(vm.isScanning == false)
     }
 }

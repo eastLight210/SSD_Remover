@@ -248,37 +248,102 @@ struct EjectViewModelTests {
         #expect(mockTerminator.terminatedProcesses.count == 2)
         #expect(vm.phase == .success)
     }
-}
 
-// MARK: - Test Mocks
+    // MARK: - 종료 실패 추적
 
-private final class MockProcessTerminator: ProcessTerminating, @unchecked Sendable {
-    var stubbedResult: TerminationResult = .terminated
-    private(set) var terminatedProcesses: [BlockingProcess] = []
+    @Test("프로세스 종료 실패 시 failedTerminations에 기록")
+    @MainActor
+    func terminationFailureTracked() async {
+        let mockTerminator = MockProcessTerminator()
+        mockTerminator.stubbedResults = [100: .terminated, 200: .failed("Permission denied")]
+        let mockEjector = MockDiskEjector()
+        mockEjector.stubbedResult = .success
 
-    func terminate(process: BlockingProcess, gracePeriod: TimeInterval) async -> TerminationResult {
-        terminatedProcesses.append(process)
-        return stubbedResult
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processTerminator: mockTerminator,
+            diskEjector: mockEjector
+        )
+
+        await vm.terminateAndEject(gracePeriod: 0)
+
+        #expect(vm.failedTerminations.count == 1)
+        #expect(vm.failedTerminations[200] == "Permission denied")
+        #expect(mockEjector.ejectCalled)
     }
 
-    func terminateAll(processes: [BlockingProcess], gracePeriod: TimeInterval) async -> [Int32: TerminationResult] {
-        var results: [Int32: TerminationResult] = [:]
-        for p in processes {
-            terminatedProcesses.append(p)
-            results[p.pid] = stubbedResult
-        }
-        return results
+    @Test("모든 그룹 선택 해제 시 바로 eject")
+    @MainActor
+    func noSelectedProcessesSkipsTermination() async {
+        let mockTerminator = MockProcessTerminator()
+        let mockEjector = MockDiskEjector()
+        mockEjector.stubbedResult = .success
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processTerminator: mockTerminator,
+            diskEjector: mockEjector
+        )
+
+        vm.toggleGroupSelection(category: .user)
+
+        await vm.terminateAndEject(gracePeriod: 0)
+
+        #expect(mockTerminator.terminatedProcesses.isEmpty)
+        #expect(mockEjector.ejectCalled)
+        #expect(vm.phase == .success)
     }
-}
 
-private final class MockDiskEjector: DiskEjecting, @unchecked Sendable {
-    var stubbedResult: EjectResult = .success
-    private(set) var ejectCalled = false
-    private(set) var ejectedVolume: ExternalVolume?
+    // MARK: - retry()
 
-    func eject(volume: ExternalVolume) async -> EjectResult {
-        ejectCalled = true
-        ejectedVolume = volume
-        return stubbedResult
+    @Test("retry() 호출 시 전체 흐름 재실행 → success")
+    @MainActor
+    func retryAfterFailureSucceeds() async {
+        let mockTerminator = MockProcessTerminator()
+        let mockEjector = MockDiskEjector()
+        mockEjector.stubbedResult = .failed("Disk is busy")
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processTerminator: mockTerminator,
+            diskEjector: mockEjector
+        )
+
+        // 첫 번째 시도 → 실패
+        await vm.terminateAndEject(gracePeriod: 0)
+        #expect(vm.phase == .failure("Disk is busy"))
+
+        // 재시도 → 성공
+        mockEjector.stubbedResult = .success
+        await vm.retry(gracePeriod: 0)
+
+        #expect(vm.phase == .success)
+        #expect(vm.failedTerminations.isEmpty)
+    }
+
+    @Test("retry() 후에도 실패하면 failure 상태 유지")
+    @MainActor
+    func retryAfterFailureStillFails() async {
+        let mockTerminator = MockProcessTerminator()
+        let mockEjector = MockDiskEjector()
+        mockEjector.stubbedResult = .failed("Disk is busy")
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processTerminator: mockTerminator,
+            diskEjector: mockEjector
+        )
+
+        await vm.terminateAndEject(gracePeriod: 0)
+        #expect(vm.phase == .failure("Disk is busy"))
+
+        mockEjector.stubbedResult = .failed("Still busy")
+        await vm.retry(gracePeriod: 0)
+
+        #expect(vm.phase == .failure("Still busy"))
     }
 }

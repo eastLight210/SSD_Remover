@@ -80,4 +80,22 @@ struct ProcessClassifierTests {
         let result = ProcessClassifier.classify([process])
         #expect(result[0].isSelected == true)
     }
+
+    @Test("대문자 MDS는 system 그룹 (spotlightCommands는 소문자 전용, 의도적 설계)")
+    func uppercaseMDSIsNotSpotlight() {
+        // macOS Spotlight 프로세스는 항상 소문자(mds, mds_stores)로 실행됨
+        // 따라서 대소문자 구분 매칭이 올바른 동작
+        let process = BlockingProcess(pid: 10, command: "MDS", user: "root", uid: 0, lockedFiles: [])
+        let result = ProcessClassifier.classify([process])
+        #expect(result.count == 1)
+        #expect(result[0].category == .system)
+    }
+
+    @Test("uid 음수값(-2)은 user 그룹으로 분류")
+    func negativeUidIsUser() {
+        let process = BlockingProcess(pid: 11, command: "nobody_proc", user: "nobody", uid: -2, lockedFiles: [])
+        let result = ProcessClassifier.classify([process])
+        #expect(result.count == 1)
+        #expect(result[0].category == .user)
+    }
 }

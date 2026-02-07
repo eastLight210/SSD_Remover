@@ -144,4 +144,52 @@ struct VolumeMonitorServiceTests {
         #expect(volumes.count == 1)
         #expect(volumes[0].name == "External")
     }
+
+    // MARK: - Edge Cases
+
+    @Test("mountedVolumeURLs() nil 반환 시 빈 볼륨 목록 + shell 미호출")
+    func nilMountedVolumes() async {
+        let mockProvider = MockVolumeURLProvider()
+        mockProvider.stubbedURLs = nil
+
+        let mockShell = MockShellExecutor()
+        let service = VolumeMonitorService(
+            volumeURLProvider: mockProvider,
+            shellExecutor: mockShell
+        )
+
+        await service.refreshVolumes()
+        let volumes = await service.volumes
+
+        #expect(volumes.isEmpty)
+        #expect(mockShell.executedCommands.isEmpty) // shell이 호출되지 않아야 함
+    }
+
+    @Test("복수 외장 볼륨 동시 감지")
+    func multipleExternalVolumes() async {
+        let mockProvider = MockVolumeURLProvider()
+        mockProvider.stubbedURLs = [
+            URL(fileURLWithPath: "/Volumes/SSD1"),
+            URL(fileURLWithPath: "/Volumes/SSD2"),
+        ]
+
+        let mockShell = MockShellExecutor()
+        mockShell.stubbedResults = [
+            makeSamplePlist(deviceId: "disk4s1", name: "SSD1", mountPoint: "/Volumes/SSD1"),
+            makeSamplePlist(deviceId: "disk5s1", name: "SSD2", mountPoint: "/Volumes/SSD2"),
+        ]
+
+        let service = VolumeMonitorService(
+            volumeURLProvider: mockProvider,
+            shellExecutor: mockShell
+        )
+
+        await service.refreshVolumes()
+        let volumes = await service.volumes
+
+        #expect(volumes.count == 2)
+        #expect(mockShell.executedCommands.count == 2)
+        #expect(volumes[0].name == "SSD1")
+        #expect(volumes[1].name == "SSD2")
+    }
 }

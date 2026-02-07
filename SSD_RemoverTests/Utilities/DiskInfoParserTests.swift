@@ -157,4 +157,65 @@ struct DiskInfoParserTests {
         #expect(volume.availableCapacity == 500_000_000_000)
         #expect(volume.mountPoint.path == "/Volumes/Samsung T7")
     }
+
+    // MARK: - Edge Case Tests
+
+    @Test("TotalSize가 문자열이면 missingRequiredField 에러")
+    func totalSizeAsStringThrows() {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/Test</string>
+            <key>VolumeName</key><string>Test</string>
+            <key>TotalSize</key><string>not_a_number</string>
+            <key>FreeSpace</key><integer>100</integer>
+        </dict>
+        </plist>
+        """
+        #expect(throws: DiskInfoParserError.self) {
+            _ = try DiskInfoParser.parse(plistString: plist)
+        }
+    }
+
+    @Test("FilesystemName 누락 시 Unknown 기본값")
+    func filesystemNameMissingDefaultsToUnknown() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/Test</string>
+            <key>VolumeName</key><string>Test</string>
+            <key>TotalSize</key><integer>1000</integer>
+            <key>FreeSpace</key><integer>500</integer>
+        </dict>
+        </plist>
+        """
+        let result = try DiskInfoParser.parse(plistString: plist)
+        #expect(result.fileSystem == "Unknown")
+    }
+
+    @Test("특수문자 경로 (공백, 한글) 파싱 성공")
+    func specialCharacterMountPoint() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>DeviceIdentifier</key><string>disk4s1</string>
+            <key>MountPoint</key><string>/Volumes/삼성 T7 외장</string>
+            <key>VolumeName</key><string>삼성 T7 외장</string>
+            <key>TotalSize</key><integer>1000000000000</integer>
+            <key>FreeSpace</key><integer>500000000000</integer>
+        </dict>
+        </plist>
+        """
+        let result = try DiskInfoParser.parse(plistString: plist)
+        #expect(result.mountPoint == "/Volumes/삼성 T7 외장")
+        #expect(result.volumeName == "삼성 T7 외장")
+    }
 }

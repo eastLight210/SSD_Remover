@@ -117,4 +117,55 @@ struct LsofOutputParserTests {
         #expect(result.count == 1)
         #expect(result[0].lockedFiles == ["/Volumes/SSD/test.txt"])
     }
+
+    // MARK: - Edge Case Tests
+
+    @Test("pid 필드 없는 레코드는 무시")
+    func noPidFieldIgnored() {
+        let output = "cvim\nu501\nLuser\nn/Volumes/SSD/file.txt"
+        let result = LsofOutputParser.parse(output)
+        #expect(result.isEmpty)
+    }
+
+    @Test("잘못된 pid 형식은 해당 레코드를 skip")
+    func invalidPidFormat() {
+        let output = "pabc\ncvim\nu501\nLuser\nn/Volumes/SSD/file.txt"
+        let result = LsofOutputParser.parse(output)
+        // pabc → Int32("abc") == nil → currentPID = nil → 결과에 추가 안됨
+        #expect(result.isEmpty)
+    }
+
+    @Test("잘못된 pid 뒤에 유효한 레코드가 오면 필드 초기화됨")
+    func invalidPidFollowedByValidRecord() {
+        let output = "pabc\ncbadcmd\nu999\nLbaduser\nn/bad/file\np100\ncvim\nu501\nLuser\nn/Volumes/SSD/file.txt"
+        let result = LsofOutputParser.parse(output)
+        // pabc 레코드는 skip, p100에서 새 레코드 시작 시 필드 초기화
+        #expect(result.count == 1)
+        #expect(result[0].pid == 100)
+        #expect(result[0].command == "vim")
+        #expect(result[0].uid == 501)
+        #expect(result[0].user == "user")
+        #expect(result[0].lockedFiles == ["/Volumes/SSD/file.txt"])
+    }
+
+    @Test("파일 필드 없는 프로세스 (lockedFiles 빈 배열)")
+    func processWithNoFiles() {
+        let output = "p100\ncvim\nu501\nLuser"
+        let result = LsofOutputParser.parse(output)
+        #expect(result.count == 1)
+        #expect(result[0].pid == 100)
+        #expect(result[0].lockedFiles.isEmpty)
+    }
+
+    @Test("불완전한 마지막 레코드도 포함")
+    func incompleteLastRecord() {
+        let output = "p100\ncvim\nu501\nLuser\nn/Volumes/SSD/file.txt\np200"
+        let result = LsofOutputParser.parse(output)
+        #expect(result.count == 2)
+        #expect(result[0].pid == 100)
+        #expect(result[0].lockedFiles == ["/Volumes/SSD/file.txt"])
+        #expect(result[1].pid == 200)
+        #expect(result[1].command == "")
+        #expect(result[1].lockedFiles.isEmpty)
+    }
 }

@@ -3,17 +3,34 @@ import SwiftUI
 struct EjectProgressView: View {
     let phase: EjectPhase
     let volumeName: String
+    let failedTerminations: [Int32: String]
     var onDismiss: (() -> Void)?
+    var onRetry: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 16) {
             icon
             statusText
+
+            // 종료 실패 프로세스 표시
+            if !failedTerminations.isEmpty {
+                Text("Failed to terminate \(failedTerminations.count) process(es)")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+            }
+
             if isCompleted {
-                Button("Done") {
-                    onDismiss?()
+                HStack(spacing: 12) {
+                    if case .failure = phase {
+                        Button("Retry") {
+                            onRetry?()
+                        }
+                    }
+                    Button("Done") {
+                        onDismiss?()
+                    }
+                    .keyboardShortcut(.defaultAction)
                 }
-                .keyboardShortcut(.defaultAction)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
