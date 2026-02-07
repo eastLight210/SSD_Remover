@@ -1,0 +1,17 @@
+import Foundation
+
+protocol VolumeURLProviding: Sendable {
+    func mountedVolumeURLs(
+        includingResourceValuesForKeys keys: [URLResourceKey]?,
+        options: FileManager.VolumeEnumerationOptions
+    ) -> [URL]?
+}
+
+extension FileManager: VolumeURLProviding, @unchecked Sendable {}
+
+protocol VolumeMonitoring: Sendable {
+    var volumes: [ExternalVolume] { get async }
+    func startMonitoring() async
+    func stopMonitoring() async
+    func refreshVolumes() async
+}

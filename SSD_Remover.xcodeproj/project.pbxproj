@@ -1,0 +1,551 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0E8C26E49FAAB476046D34EE /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A8DC44EC985473E123C4DBC /* Constants.swift */; };
+		16B5B2E31A57E5B9CC736420 /* ExternalVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C0AC539FD789A1984AA1628 /* ExternalVolume.swift */; };
+		203D493E1756903BA0B57B88 /* ConstantsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395BB0A7ABBEB3C2CAE9384D /* ConstantsTests.swift */; };
+		28512CFAF3AAC0BC9E318B59 /* VolumeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3549927A611B9AC179735 /* VolumeRowView.swift */; };
+		3704D2BB1B36BF08A3B07B1C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D47C6FBD89E48240A0141CE /* EmptyStateView.swift */; };
+		42A6EC9B2C47AC2C0275FB2E /* ShellExecuting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE5A8B71FF2234721B59857 /* ShellExecuting.swift */; };
+		508B7E95CD62A4DCA1DB4FB3 /* VolumeMonitoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFD39E5221C7BEE23268B65 /* VolumeMonitoring.swift */; };
+		553D92ABD84F6452C465E4F4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103734AD05AC184FC3479BE4 /* ContentView.swift */; };
+		650C3C7EF4A07DE431257E78 /* VolumeMonitorServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37885C87DF821ACC2783EE9D /* VolumeMonitorServiceTests.swift */; };
+		6C0D539FC293E874A1121313 /* VolumeMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F04D43058F069204963637 /* VolumeMonitorService.swift */; };
+		8F6F717A1761A20DB4BF71C6 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C249A1ED53FF1DC90112AA /* AppViewModel.swift */; };
+		A2DE4F9C5B7CD47766501A79 /* SSDRemoverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112778C0C05881F4274CBF08 /* SSDRemoverApp.swift */; };
+		A646EA6D5922A5397166BB27 /* DiskInfoParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96935C4D4148A76337B4313 /* DiskInfoParserTests.swift */; };
+		B2E54889FDDD1720F5D0EC80 /* ExternalVolumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48EACFAD5C5D0F86643F6906 /* ExternalVolumeTests.swift */; };
+		B7A1678FB8AB09F4E905FBAF /* ShellExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C248C49504AD67A10BC1F6BF /* ShellExecutor.swift */; };
+		D02457966EE88A9C4015E2F1 /* MockVolumeURLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D9F42795089DB52B9338740 /* MockVolumeURLProvider.swift */; };
+		D7B1752C6213CE871D4895F8 /* AppViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5577BDF435CE8277850A04 /* AppViewModelTests.swift */; };
+		DBECDD6BEB01E9B44092F92C /* DiskInfoParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81FEC4EBCFFDE0A46719FE29 /* DiskInfoParser.swift */; };
+		DDE60E2ED47A2228FC365249 /* ShellExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20E876A6B9E044D8135F9D1 /* ShellExecutorTests.swift */; };
+		E2C38BA83CB29130407656DA /* MockShellExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B496836C43E8DCBB5D861924 /* MockShellExecutor.swift */; };
+		F3898BC5DE58C2C6C20F74D7 /* VolumeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C695762482C91C18FEDF5C3B /* VolumeListView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		61485C294CDB475C9C0A811F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 09A6BFBA68D9801264B5954C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0618747B1568AA8AE5BA5C9F;
+			remoteInfo = SSD_Remover;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		103734AD05AC184FC3479BE4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		112778C0C05881F4274CBF08 /* SSDRemoverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSDRemoverApp.swift; sourceTree = "<group>"; };
+		1D47C6FBD89E48240A0141CE /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		2A54BC1DAFAEF2C5E03976F1 /* SSD_Remover.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SSD_Remover.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		37885C87DF821ACC2783EE9D /* VolumeMonitorServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeMonitorServiceTests.swift; sourceTree = "<group>"; };
+		395BB0A7ABBEB3C2CAE9384D /* ConstantsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantsTests.swift; sourceTree = "<group>"; };
+		3EFD39E5221C7BEE23268B65 /* VolumeMonitoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeMonitoring.swift; sourceTree = "<group>"; };
+		40B3549927A611B9AC179735 /* VolumeRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeRowView.swift; sourceTree = "<group>"; };
+		48EACFAD5C5D0F86643F6906 /* ExternalVolumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalVolumeTests.swift; sourceTree = "<group>"; };
+		4C5577BDF435CE8277850A04 /* AppViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModelTests.swift; sourceTree = "<group>"; };
+		7A8DC44EC985473E123C4DBC /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		7D9F42795089DB52B9338740 /* MockVolumeURLProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockVolumeURLProvider.swift; sourceTree = "<group>"; };
+		81FEC4EBCFFDE0A46719FE29 /* DiskInfoParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskInfoParser.swift; sourceTree = "<group>"; };
+		8AE5A8B71FF2234721B59857 /* ShellExecuting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellExecuting.swift; sourceTree = "<group>"; };
+		9C0AC539FD789A1984AA1628 /* ExternalVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalVolume.swift; sourceTree = "<group>"; };
+		A03C6B2BBE2AD8958FE66583 /* SSD_RemoverTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SSD_RemoverTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B496836C43E8DCBB5D861924 /* MockShellExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockShellExecutor.swift; sourceTree = "<group>"; };
+		B5C249A1ED53FF1DC90112AA /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		C248C49504AD67A10BC1F6BF /* ShellExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellExecutor.swift; sourceTree = "<group>"; };
+		C695762482C91C18FEDF5C3B /* VolumeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeListView.swift; sourceTree = "<group>"; };
+		C96935C4D4148A76337B4313 /* DiskInfoParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskInfoParserTests.swift; sourceTree = "<group>"; };
+		E20E876A6B9E044D8135F9D1 /* ShellExecutorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellExecutorTests.swift; sourceTree = "<group>"; };
+		E7F04D43058F069204963637 /* VolumeMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeMonitorService.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		278460C6B6623CCA82335CDD /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				103734AD05AC184FC3479BE4 /* ContentView.swift */,
+				1D47C6FBD89E48240A0141CE /* EmptyStateView.swift */,
+				C695762482C91C18FEDF5C3B /* VolumeListView.swift */,
+				40B3549927A611B9AC179735 /* VolumeRowView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		40134104A881F2C340A000BC /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				4C5577BDF435CE8277850A04 /* AppViewModelTests.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		5DBA77E93331B138BAA63EB3 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				395BB0A7ABBEB3C2CAE9384D /* ConstantsTests.swift */,
+				C96935C4D4148A76337B4313 /* DiskInfoParserTests.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		6E2C3A871881964AEB194B7E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B5C249A1ED53FF1DC90112AA /* AppViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		6F9278919D855D16C839F267 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				9C0AC539FD789A1984AA1628 /* ExternalVolume.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		72731E64D6763BF8C71B4F2F /* SSD_Remover */ = {
+			isa = PBXGroup;
+			children = (
+				BFCFC78EFBA11053FEFFD2D2 /* App */,
+				6F9278919D855D16C839F267 /* Models */,
+				A0069B252410EE8983C59CC9 /* Services */,
+				BB73DE876BF40A30A28733CF /* Utilities */,
+				6E2C3A871881964AEB194B7E /* ViewModels */,
+				278460C6B6623CCA82335CDD /* Views */,
+			);
+			path = SSD_Remover;
+			sourceTree = "<group>";
+		};
+		7C694C3090DA0919D2DC1252 = {
+			isa = PBXGroup;
+			children = (
+				72731E64D6763BF8C71B4F2F /* SSD_Remover */,
+				9104B02A43710CF5870D19D4 /* SSD_RemoverTests */,
+				F3BA9A09D9D8D1F1B205FF4D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9104B02A43710CF5870D19D4 /* SSD_RemoverTests */ = {
+			isa = PBXGroup;
+			children = (
+				F9F25D356E4B627DB159FE13 /* Mocks */,
+				EBEADFCA1BA46366B95C6C4D /* Models */,
+				944F484296B43D76A5F06CCB /* Services */,
+				5DBA77E93331B138BAA63EB3 /* Utilities */,
+				40134104A881F2C340A000BC /* ViewModels */,
+			);
+			path = SSD_RemoverTests;
+			sourceTree = "<group>";
+		};
+		944F484296B43D76A5F06CCB /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				E20E876A6B9E044D8135F9D1 /* ShellExecutorTests.swift */,
+				37885C87DF821ACC2783EE9D /* VolumeMonitorServiceTests.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A0069B252410EE8983C59CC9 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C248C49504AD67A10BC1F6BF /* ShellExecutor.swift */,
+				E7F04D43058F069204963637 /* VolumeMonitorService.swift */,
+				E7B1CC71CB25BCC4AD1C4B1C /* Protocols */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		BB73DE876BF40A30A28733CF /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				7A8DC44EC985473E123C4DBC /* Constants.swift */,
+				81FEC4EBCFFDE0A46719FE29 /* DiskInfoParser.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		BFCFC78EFBA11053FEFFD2D2 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				112778C0C05881F4274CBF08 /* SSDRemoverApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E7B1CC71CB25BCC4AD1C4B1C /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				8AE5A8B71FF2234721B59857 /* ShellExecuting.swift */,
+				3EFD39E5221C7BEE23268B65 /* VolumeMonitoring.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		EBEADFCA1BA46366B95C6C4D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				48EACFAD5C5D0F86643F6906 /* ExternalVolumeTests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		F3BA9A09D9D8D1F1B205FF4D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2A54BC1DAFAEF2C5E03976F1 /* SSD_Remover.app */,
+				A03C6B2BBE2AD8958FE66583 /* SSD_RemoverTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F9F25D356E4B627DB159FE13 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				B496836C43E8DCBB5D861924 /* MockShellExecutor.swift */,
+				7D9F42795089DB52B9338740 /* MockVolumeURLProvider.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0618747B1568AA8AE5BA5C9F /* SSD_Remover */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5242F4DEB67D696F40699C2 /* Build configuration list for PBXNativeTarget "SSD_Remover" */;
+			buildPhases = (
+				C63D37722AABDCCE6654CEF4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SSD_Remover;
+			productName = SSD_Remover;
+			productReference = 2A54BC1DAFAEF2C5E03976F1 /* SSD_Remover.app */;
+			productType = "com.apple.product-type.application";
+		};
+		30D1ECBB648EFD17F1B0205D /* SSD_RemoverTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 05EEE8AFA4093192613B746B /* Build configuration list for PBXNativeTarget "SSD_RemoverTests" */;
+			buildPhases = (
+				67F9999BA8531595636991CC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6C72E748A20944D7A1D4279D /* PBXTargetDependency */,
+			);
+			name = SSD_RemoverTests;
+			productName = SSD_RemoverTests;
+			productReference = A03C6B2BBE2AD8958FE66583 /* SSD_RemoverTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		09A6BFBA68D9801264B5954C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 88CE258234FDF7AF307C04DA /* Build configuration list for PBXProject "SSD_Remover" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7C694C3090DA0919D2DC1252;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0618747B1568AA8AE5BA5C9F /* SSD_Remover */,
+				30D1ECBB648EFD17F1B0205D /* SSD_RemoverTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		67F9999BA8531595636991CC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7B1752C6213CE871D4895F8 /* AppViewModelTests.swift in Sources */,
+				203D493E1756903BA0B57B88 /* ConstantsTests.swift in Sources */,
+				A646EA6D5922A5397166BB27 /* DiskInfoParserTests.swift in Sources */,
+				B2E54889FDDD1720F5D0EC80 /* ExternalVolumeTests.swift in Sources */,
+				E2C38BA83CB29130407656DA /* MockShellExecutor.swift in Sources */,
+				D02457966EE88A9C4015E2F1 /* MockVolumeURLProvider.swift in Sources */,
+				DDE60E2ED47A2228FC365249 /* ShellExecutorTests.swift in Sources */,
+				650C3C7EF4A07DE431257E78 /* VolumeMonitorServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C63D37722AABDCCE6654CEF4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8F6F717A1761A20DB4BF71C6 /* AppViewModel.swift in Sources */,
+				0E8C26E49FAAB476046D34EE /* Constants.swift in Sources */,
+				553D92ABD84F6452C465E4F4 /* ContentView.swift in Sources */,
+				DBECDD6BEB01E9B44092F92C /* DiskInfoParser.swift in Sources */,
+				3704D2BB1B36BF08A3B07B1C /* EmptyStateView.swift in Sources */,
+				16B5B2E31A57E5B9CC736420 /* ExternalVolume.swift in Sources */,
+				A2DE4F9C5B7CD47766501A79 /* SSDRemoverApp.swift in Sources */,
+				42A6EC9B2C47AC2C0275FB2E /* ShellExecuting.swift in Sources */,
+				B7A1678FB8AB09F4E905FBAF /* ShellExecutor.swift in Sources */,
+				F3898BC5DE58C2C6C20F74D7 /* VolumeListView.swift in Sources */,
+				6C0D539FC293E874A1121313 /* VolumeMonitorService.swift in Sources */,
+				508B7E95CD62A4DCA1DB4FB3 /* VolumeMonitoring.swift in Sources */,
+				28512CFAF3AAC0BC9E318B59 /* VolumeRowView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6C72E748A20944D7A1D4279D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0618747B1568AA8AE5BA5C9F /* SSD_Remover */;
+			targetProxy = 61485C294CDB475C9C0A811F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A413CB52BF6DC19258EB575C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.2;
+			};
+			name = Release;
+		};
+		AC3F895FE7E856BD26190926 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SSD_Remover/SSD_Remover.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				INFOPLIST_FILE = SSD_Remover/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-Remover";
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Release;
+		};
+		BA1F6BA6436DAE6789DF44EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.2;
+			};
+			name = Debug;
+		};
+		CA5D47F60A664EA3715B637F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-RemoverTests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SSD_Remover.app/Contents/MacOS/SSD_Remover";
+			};
+			name = Debug;
+		};
+		D7824A4842E798C7F25AE06A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-RemoverTests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SSD_Remover.app/Contents/MacOS/SSD_Remover";
+			};
+			name = Release;
+		};
+		E0C4E98A7CB4DFC473FD6298 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SSD_Remover/SSD_Remover.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				INFOPLIST_FILE = SSD_Remover/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-Remover";
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		05EEE8AFA4093192613B746B /* Build configuration list for PBXNativeTarget "SSD_RemoverTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA5D47F60A664EA3715B637F /* Debug */,
+				D7824A4842E798C7F25AE06A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		88CE258234FDF7AF307C04DA /* Build configuration list for PBXProject "SSD_Remover" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA1F6BA6436DAE6789DF44EE /* Debug */,
+				A413CB52BF6DC19258EB575C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5242F4DEB67D696F40699C2 /* Build configuration list for PBXNativeTarget "SSD_Remover" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E0C4E98A7CB4DFC473FD6298 /* Debug */,
+				AC3F895FE7E856BD26190926 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 09A6BFBA68D9801264B5954C /* Project object */;
+}
