@@ -6,9 +6,15 @@ enum PrivilegedExecutorError: Error, Equatable {
 }
 
 actor PrivilegedExecutor: PrivilegedExecuting {
-    func executeWithPrivileges(command: String) async throws -> String {
-        let escapedCommand = command.replacingOccurrences(of: "\\", with: "\\\\")
+
+    /// AppleScript do shell script용 command 이스케이핑
+    static func escapeForAppleScript(_ command: String) -> String {
+        command.replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
+    }
+
+    func executeWithPrivileges(command: String) async throws -> String {
+        let escapedCommand = Self.escapeForAppleScript(command)
         let source = "do shell script \"\(escapedCommand)\" with administrator privileges"
 
         return try await withCheckedThrowingContinuation { continuation in

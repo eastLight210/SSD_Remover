@@ -178,4 +178,61 @@ struct ProcessTerminatorServiceTests {
 
         #expect(result == .failed("User cancelled privilege escalation"))
     }
+
+    // MARK: - Edge Cases
+
+    @Test("ShellError.launchFailed → .failed")
+    func launchFailedError() async {
+        let mockShell = MockShellExecutor()
+        let mockPrivileged = MockPrivilegedExecutor()
+        mockShell.stubbedErrors = [ShellError.launchFailed("kill not found")]
+
+        let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
+        let result = await service.terminate(process: userProcess, gracePeriod: 0)
+
+        #expect(result == .failed("kill not found"))
+    }
+
+    @Test("root 프로세스 - scriptError → .failed")
+    func rootScriptError() async {
+        let mockShell = MockShellExecutor()
+        let mockPrivileged = MockPrivilegedExecutor()
+        mockPrivileged.stubbedError = PrivilegedExecutorError.scriptError("Permission denied")
+
+        let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
+        let result = await service.terminate(process: rootProcess, gracePeriod: 0)
+
+        #expect(result == .failed("Permission denied"))
+    }
+
+    @Test("root 프로세스 - scriptError에 No such process 포함 → .alreadyExited")
+    func rootScriptErrorNoSuchProcess() async {
+        let mockShell = MockShellExecutor()
+        let mockPrivileged = MockPrivilegedExecutor()
+        mockPrivileged.stubbedError = PrivilegedExecutorError.scriptError("No such process")
+
+        let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
+        let result = await service.terminate(process: rootProcess, gracePeriod: 0)
+
+        #expect(result == .alreadyExited)
+    }
+
+    @Test("SIGTERM 성공 + 생존 + SIGKILL 실패 → .failed")
+    func sigkillFailure() async {
+        let mockShell = MockShellExecutor()
+        let mockPrivileged = MockPrivilegedExecutor()
+
+        // kill -15 성공, kill -0 성공(생존), kill -9 실패
+        mockShell.stubbedResults = ["", "", ""]
+        mockShell.stubbedErrors = [
+            nil,
+            nil,
+            ShellError.executionFailed(exitCode: 1, stderr: "Operation not permitted")
+        ]
+
+        let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
+        let result = await service.terminate(process: userProcess, gracePeriod: 0)
+
+        #expect(result == .failed("Operation not permitted"))
+    }
 }

@@ -12,12 +12,16 @@ struct ContentView: View {
 
             if let ejectVM = ejectViewModel {
                 if ejectVM.phase == .confirming {
-                    ProcessListView(viewModel: ejectVM)
+                    ProcessListView(viewModel: ejectVM, onCancel: { dismissEject() })
                 } else {
                     EjectProgressView(
                         phase: ejectVM.phase,
                         volumeName: ejectVM.volume.name,
-                        onDismiss: { dismissEject() }
+                        failedTerminations: ejectVM.failedTerminations,
+                        onDismiss: { dismissEject() },
+                        onRetry: {
+                            Task { await ejectVM.retry() }
+                        }
                     )
                 }
             } else if viewModel.isLoading || viewModel.isScanning {

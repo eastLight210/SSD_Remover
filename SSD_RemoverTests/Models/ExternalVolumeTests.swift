@@ -142,4 +142,18 @@ struct ExternalVolumeTests {
 
         #expect(set.count == 2)
     }
+
+    @Test("parentWholeDisk 다양한 deviceIdentifier",
+          arguments: zip(
+              ["disk4s1", "disk10s2", "disk2", "disk100s10"],
+              ["disk4", "disk10", "disk2", "disk100"]
+          ))
+    func parentWholeDiskVariants(input: String, expected: String) {
+        let url = URL(fileURLWithPath: "/Volumes/Test")
+        let volume = ExternalVolume(
+            id: url, name: "Test", deviceIdentifier: input,
+            fileSystem: "APFS", totalCapacity: 100, availableCapacity: 50, mountPoint: url
+        )
+        #expect(volume.parentWholeDisk == expected)
+    }
 }

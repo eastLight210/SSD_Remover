@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProcessListView: View {
     @Bindable var viewModel: EjectViewModel
+    var onCancel: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +28,7 @@ struct ProcessListView: View {
 
             HStack {
                 Button("Cancel") {
-                    // handled by parent
+                    onCancel?()
                 }
                 .keyboardShortcut(.cancelAction)
 
