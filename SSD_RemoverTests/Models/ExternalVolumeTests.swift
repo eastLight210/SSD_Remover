@@ -86,7 +86,7 @@ struct ExternalVolumeTests {
 
         let formatted = volume.formattedCapacity
         #expect(formatted.contains("2"))
-        #expect(formatted.contains("1.5") || formatted.contains("1,5"))
+        #expect(formatted.contains("500"))
     }
 
     @Test("parentWholeDisk - 파티션 번호 제거")

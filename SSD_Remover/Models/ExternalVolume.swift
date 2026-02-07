@@ -20,8 +20,8 @@ struct ExternalVolume: Identifiable, Equatable, Hashable, Sendable {
     var formattedCapacity: String {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
+        let used = formatter.string(fromByteCount: totalCapacity - availableCapacity)
         let total = formatter.string(fromByteCount: totalCapacity)
-        let available = formatter.string(fromByteCount: availableCapacity)
-        return "\(available) / \(total)"
+        return "\(used) / \(total)"
     }
 }
