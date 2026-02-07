@@ -1,8 +1,10 @@
 import SwiftUI
+import ServiceManagement
 
 struct ContentView: View {
     @Bindable var viewModel: AppViewModel
     @State private var ejectViewModel: EjectViewModel?
+    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     var body: some View {
         VStack(spacing: 0) {
@@ -67,6 +69,24 @@ struct ContentView: View {
             }
             .buttonStyle(.borderless)
             .disabled(ejectViewModel != nil)
+
+            Toggle(isOn: $launchAtLogin) {
+                Image(systemName: "power")
+            }
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+            .help("로그인 시 자동 실행")
+            .onChange(of: launchAtLogin) { _, newValue in
+                do {
+                    if newValue {
+                        try SMAppService.mainApp.register()
+                    } else {
+                        try SMAppService.mainApp.unregister()
+                    }
+                } catch {
+                    launchAtLogin = !newValue
+                }
+            }
 
             Button {
                 NSApplication.shared.terminate(nil)
