@@ -23,6 +23,13 @@ struct ProcessListView: View {
                 }
                 .padding(12)
             }
+            .overlay {
+                if viewModel.isRescanning {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(.ultraThinMaterial)
+                }
+            }
 
             Divider()
 

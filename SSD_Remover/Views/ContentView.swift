@@ -63,12 +63,16 @@ struct ContentView: View {
                 .font(.headline)
             Spacer()
             Button {
-                Task { await viewModel.refreshVolumes() }
+                if let ejectVM = ejectViewModel, ejectVM.phase == .confirming {
+                    Task { await ejectVM.rescanProcesses() }
+                } else {
+                    Task { await viewModel.refreshVolumes() }
+                }
             } label: {
                 Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.borderless)
-            .disabled(ejectViewModel != nil)
+            .disabled(ejectViewModel?.isRescanning == true || (ejectViewModel != nil && ejectViewModel?.phase != .confirming))
 
             Toggle(isOn: $launchAtLogin) {
                 Image(systemName: "power")
@@ -105,6 +109,7 @@ struct ContentView: View {
         let ejectVM = EjectViewModel(
             volume: volume,
             processGroups: viewModel.processGroups,
+            processScanner: ProcessScannerService(shell: ShellExecutor()),
             processTerminator: ProcessTerminatorService(
                 shell: ShellExecutor(),
                 privilegedShell: PrivilegedExecutor()

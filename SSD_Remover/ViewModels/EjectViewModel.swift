@@ -15,18 +15,23 @@ final class EjectViewModel {
     private(set) var processGroups: [ProcessGroup] = []
     private(set) var failedTerminations: [Int32: String] = [:]
 
+    private(set) var isRescanning = false
+
     let volume: ExternalVolume
+    private let processScanner: ProcessScanning
     private let processTerminator: ProcessTerminating
     private let diskEjector: DiskEjecting
 
     init(
         volume: ExternalVolume,
         processGroups: [ProcessGroup],
+        processScanner: ProcessScanning,
         processTerminator: ProcessTerminating,
         diskEjector: DiskEjecting
     ) {
         self.volume = volume
         self.processGroups = processGroups
+        self.processScanner = processScanner
         self.processTerminator = processTerminator
         self.diskEjector = diskEjector
     }
@@ -79,5 +84,17 @@ final class EjectViewModel {
     /// failure 상태에서 전체 흐름을 재실행
     func retry(gracePeriod: TimeInterval = 3.0) async {
         await terminateAndEject(gracePeriod: gracePeriod)
+    }
+
+    /// confirming 상태에서 프로세스 목록 재스캔
+    func rescanProcesses() async {
+        guard phase == .confirming else { return }
+        isRescanning = true
+        do {
+            processGroups = try await processScanner.scanProcesses(for: volume)
+        } catch {
+            // 스캔 실패 시 기존 목록 유지
+        }
+        isRescanning = false
     }
 }
