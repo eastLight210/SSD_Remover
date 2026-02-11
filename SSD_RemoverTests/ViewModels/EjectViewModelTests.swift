@@ -61,6 +61,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(),
+            processScanner: MockProcessScanner(),
             processTerminator: MockProcessTerminator(),
             diskEjector: MockDiskEjector()
         )
@@ -76,6 +77,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: true, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: MockProcessTerminator(),
             diskEjector: MockDiskEjector()
         )
@@ -89,6 +91,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: MockProcessTerminator(),
             diskEjector: MockDiskEjector()
         )
@@ -106,6 +109,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: MockProcessTerminator(),
             diskEjector: MockDiskEjector()
         )
@@ -122,6 +126,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: true, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: MockProcessTerminator(),
             diskEjector: MockDiskEjector()
         )
@@ -142,6 +147,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: true),
+            processScanner: MockProcessScanner(),
             processTerminator: MockProcessTerminator(),
             diskEjector: MockDiskEjector()
         )
@@ -155,6 +161,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false),
+            processScanner: MockProcessScanner(),
             processTerminator: MockProcessTerminator(),
             diskEjector: MockDiskEjector()
         )
@@ -174,6 +181,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -195,6 +203,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: [],
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -216,6 +225,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -235,6 +245,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: true, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -262,6 +273,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -283,6 +295,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -308,6 +321,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -334,6 +348,7 @@ struct EjectViewModelTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -345,5 +360,102 @@ struct EjectViewModelTests {
         await vm.retry(gracePeriod: 0)
 
         #expect(vm.phase == .failure("Still busy"))
+    }
+
+    // MARK: - rescanProcesses
+
+    @Test("재스캔 성공 시 processGroups 갱신")
+    @MainActor
+    func rescanProcessesUpdatesGroups() async {
+        let mockScanner = MockProcessScanner()
+        let newGroups = [ProcessGroup(
+            category: .user,
+            processes: [BlockingProcess(pid: 999, command: "newcmd", user: "user", uid: 501, lockedFiles: ["/Volumes/TestDrive/new.txt"])]
+        )]
+        mockScanner.stubbedResult = newGroups
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(),
+            processScanner: mockScanner,
+            processTerminator: MockProcessTerminator(),
+            diskEjector: MockDiskEjector()
+        )
+
+        #expect(vm.processGroups.flatMap { $0.processes }.count == 2)
+
+        await vm.rescanProcesses()
+
+        #expect(vm.processGroups.count == 1)
+        #expect(vm.processGroups.first?.processes.first?.pid == 999)
+        #expect(mockScanner.scannedVolumes.count == 1)
+    }
+
+    @Test("재스캔 실패 시 기존 목록 유지")
+    @MainActor
+    func rescanProcessesKeepsGroupsOnError() async {
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedError = ShellError.executionFailed(exitCode: 1, stderr: "scan failed")
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(),
+            processScanner: mockScanner,
+            processTerminator: MockProcessTerminator(),
+            diskEjector: MockDiskEjector()
+        )
+
+        let originalCount = vm.processGroups.flatMap { $0.processes }.count
+
+        await vm.rescanProcesses()
+
+        #expect(vm.processGroups.flatMap { $0.processes }.count == originalCount)
+        #expect(vm.phase == .confirming)
+    }
+
+    @Test("confirming이 아닌 상태에서 재스캔 무시")
+    @MainActor
+    func rescanProcessesIgnoredWhenNotConfirming() async {
+        let mockScanner = MockProcessScanner()
+        let mockEjector = MockDiskEjector()
+        mockEjector.stubbedResult = .success
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(),
+            processScanner: mockScanner,
+            processTerminator: MockProcessTerminator(),
+            diskEjector: mockEjector
+        )
+
+        // success 상태로 전환
+        await vm.terminateAndEject(gracePeriod: 0)
+        #expect(vm.phase == .success)
+
+        await vm.rescanProcesses()
+
+        #expect(mockScanner.scannedVolumes.isEmpty)
+    }
+
+    @Test("재스캔 중 isRescanning이 true")
+    @MainActor
+    func rescanProcessesSetsIsRescanning() async {
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedResult = []
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(),
+            processScanner: mockScanner,
+            processTerminator: MockProcessTerminator(),
+            diskEjector: MockDiskEjector()
+        )
+
+        #expect(vm.isRescanning == false)
+
+        await vm.rescanProcesses()
+
+        // 완료 후 false
+        #expect(vm.isRescanning == false)
     }
 }

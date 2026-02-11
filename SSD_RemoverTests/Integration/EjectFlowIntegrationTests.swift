@@ -30,6 +30,7 @@ struct EjectFlowIntegrationTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: groups,
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
@@ -58,6 +59,7 @@ struct EjectFlowIntegrationTests {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: groups,
+            processScanner: MockProcessScanner(),
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
