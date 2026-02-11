@@ -16,6 +16,7 @@
 		2CBF8FB46319EC451530836D /* MockProcessScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D62546C5326EB337DE35BE /* MockProcessScanner.swift */; };
 		310B66348E47FA1AAE6852E5 /* EjectViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED22AB12C2714DE9C95D6005 /* EjectViewModel.swift */; };
 		318770EB660B5C7FCF949D21 /* PrivilegedExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21588671EF663DAD3FA52A8A /* PrivilegedExecutorTests.swift */; };
+		33A17646091E22A376B2399D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1453186F856FAB7EC9D97B8 /* Assets.xcassets */; };
 		36CE877A497BEDD319FE6589 /* EjectViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ED227BAFE3B3A20294FB8C /* EjectViewModelTests.swift */; };
 		3704D2BB1B36BF08A3B07B1C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D47C6FBD89E48240A0141CE /* EmptyStateView.swift */; };
 		3D8B73A29070F0E074E71C64 /* ProcessListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C079C76ED4F4AFA6FCB769 /* ProcessListView.swift */; };
@@ -116,6 +117,7 @@
 		A2381D5FEE3E835BCD02C9CF /* TerminateAndEjectChainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminateAndEjectChainTests.swift; sourceTree = "<group>"; };
 		A981A0D5F7211ED75FEA7836 /* ProcessGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessGroup.swift; sourceTree = "<group>"; };
 		ACB10570C8053434B449C9EB /* LsofOutputParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LsofOutputParser.swift; sourceTree = "<group>"; };
+		B1453186F856FAB7EC9D97B8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1B1C9A141FE502E1ED2B007 /* ProcessScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessScannerService.swift; sourceTree = "<group>"; };
 		B3D62546C5326EB337DE35BE /* MockProcessScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProcessScanner.swift; sourceTree = "<group>"; };
 		B496836C43E8DCBB5D861924 /* MockShellExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockShellExecutor.swift; sourceTree = "<group>"; };
@@ -146,6 +148,14 @@
 				40B3549927A611B9AC179735 /* VolumeRowView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		3C08ACD96C72E30B5266966D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B1453186F856FAB7EC9D97B8 /* Assets.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		40134104A881F2C340A000BC /* ViewModels */ = {
@@ -192,6 +202,7 @@
 			children = (
 				BFCFC78EFBA11053FEFFD2D2 /* App */,
 				6F9278919D855D16C839F267 /* Models */,
+				3C08ACD96C72E30B5266966D /* Resources */,
 				A0069B252410EE8983C59CC9 /* Services */,
 				BB73DE876BF40A30A28733CF /* Utilities */,
 				6E2C3A871881964AEB194B7E /* ViewModels */,
@@ -331,6 +342,7 @@
 			buildConfigurationList = A5242F4DEB67D696F40699C2 /* Build configuration list for PBXNativeTarget "SSD_Remover" */;
 			buildPhases = (
 				C63D37722AABDCCE6654CEF4 /* Sources */,
+				41C359C32067A772F1293E21 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -385,6 +397,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		41C359C32067A772F1293E21 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				33A17646091E22A376B2399D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		67F9999BA8531595636991CC /* Sources */ = {
