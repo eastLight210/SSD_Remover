@@ -101,13 +101,31 @@ actor ProcessTerminatorService: ProcessTerminating {
 
     private func isProcessAlive(_ process: BlockingProcess) async -> Bool {
         do {
-            _ = try await shell.execute(
-                command: Constants.killPath,
-                arguments: ["-0", String(process.pid)]
-            )
+            if process.isRoot {
+                _ = try await privilegedShell.executeWithPrivileges(
+                    command: "\(Constants.killPath) -0 \(process.pid)"
+                )
+            } else {
+                _ = try await shell.execute(
+                    command: Constants.killPath,
+                    arguments: ["-0", String(process.pid)]
+                )
+            }
+            return true
+        } catch let error as ShellError {
+            if case .executionFailed(_, let stderr) = error,
+               stderr.contains("No such process") {
+                return false
+            }
+            return true
+        } catch let error as PrivilegedExecutorError {
+            if case .scriptError(let message) = error,
+               message.contains("No such process") {
+                return false
+            }
             return true
         } catch {
-            return false
+            return true
         }
     }
 }

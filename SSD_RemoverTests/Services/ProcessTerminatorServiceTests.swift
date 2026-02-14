@@ -90,19 +90,17 @@ struct ProcessTerminatorServiceTests {
         let mockShell = MockShellExecutor()
         let mockPrivileged = MockPrivilegedExecutor()
 
-        // kill -15는 privileged로 실행
-        // kill -0는 일반 shell로 실행 → 실패 (프로세스 종료됨)
-        mockShell.stubbedErrors = [ShellError.executionFailed(exitCode: 1, stderr: "No such process")]
+        // kill -15, kill -0 모두 privileged로 실행
+        mockPrivileged.stubbedError = PrivilegedExecutorError.scriptError("No such process")
 
         let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
         let result = await service.terminate(process: rootProcess, gracePeriod: 0)
 
         #expect(result == .terminated)
-        #expect(mockPrivileged.executedCommands.count == 1)
+        #expect(mockPrivileged.executedCommands.count == 2)
         #expect(mockPrivileged.executedCommands[0].contains("kill -15 5678"))
-        // kill -0은 일반 shell로 확인
-        #expect(mockShell.executedCommands.count == 1)
-        #expect(mockShell.executedCommands[0].arguments == ["-0", "5678"])
+        #expect(mockPrivileged.executedCommands[1].contains("kill -0 5678"))
+        #expect(mockShell.executedCommands.isEmpty)
     }
 
     @Test("root 프로세스 SIGTERM 후 생존 → SIGKILL도 privileged")
@@ -110,18 +108,16 @@ struct ProcessTerminatorServiceTests {
         let mockShell = MockShellExecutor()
         let mockPrivileged = MockPrivilegedExecutor()
 
-        // kill -0은 일반 shell → 성공 (프로세스 생존)
-        mockShell.stubbedResults = [""]
-        mockShell.stubbedErrors = [nil]
-
         let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
         let result = await service.terminate(process: rootProcess, gracePeriod: 0)
 
         #expect(result == .terminated)
-        // privileged: kill -15, kill -9
-        #expect(mockPrivileged.executedCommands.count == 2)
+        // privileged: kill -15, kill -0, kill -9
+        #expect(mockPrivileged.executedCommands.count == 3)
         #expect(mockPrivileged.executedCommands[0].contains("-15"))
-        #expect(mockPrivileged.executedCommands[1].contains("-9"))
+        #expect(mockPrivileged.executedCommands[1].contains("-0"))
+        #expect(mockPrivileged.executedCommands[2].contains("-9"))
+        #expect(mockShell.executedCommands.isEmpty)
     }
 
     // MARK: - terminateAll
@@ -149,6 +145,7 @@ struct ProcessTerminatorServiceTests {
         #expect(results.count == 2)
         #expect(results[userProcess.pid] == .terminated)
         #expect(results[rootProcess.pid] == .terminated)
+        #expect(mockPrivileged.executedCommands.count == 2)
     }
 
     // MARK: - 실패 케이스
