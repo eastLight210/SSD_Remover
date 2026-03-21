@@ -1,0 +1,97 @@
+import Testing
+import Foundation
+@testable import SSD_Remover
+
+@Suite("CLICommandParser Tests")
+struct CLICommandParserTests {
+    private let parser = CLICommandParser()
+
+    @Test("인자가 없으면 help 명령으로 해석")
+    func emptyArgumentsReturnsHelp() throws {
+        let command = try parser.parse(arguments: [])
+
+        #expect(command == .help)
+    }
+
+    @Test("scan 명령은 볼륨 쿼리를 파싱")
+    func parsesScanCommand() throws {
+        let command = try parser.parse(arguments: ["scan", "TestDrive"])
+
+        #expect(command == .scan(volumeQuery: "TestDrive"))
+    }
+
+    @Test("scan/eject 명령은 추가 피연산자를 거부")
+    func rejectsExtraVolumeQueryOperands() {
+        #expect(throws: CLIParseError.unexpectedArguments(command: "scan", arguments: ["SSD"])) {
+            try parser.parse(arguments: ["scan", "Backup", "SSD"])
+        }
+
+        #expect(throws: CLIParseError.unexpectedArguments(command: "eject", arguments: ["--force"])) {
+            try parser.parse(arguments: ["eject", "MyDrive", "--force"])
+        }
+    }
+
+    @Test("terminate-and-eject 명령은 선택 필터와 grace period를 파싱")
+    func parsesTerminateAndEjectCommand() throws {
+        let command = try parser.parse(arguments: [
+            "terminate-and-eject",
+            "TestDrive",
+            "--group", "user",
+            "--group", "spotlight",
+            "--pid", "200",
+            "--grace-period", "1.5",
+        ])
+
+        #expect(command == .terminateAndEject(
+            volumeQuery: "TestDrive",
+            selection: CLIProcessSelection(
+                categories: [.spotlight, .user],
+                pids: [200]
+            ),
+            gracePeriod: 1.5
+        ))
+    }
+
+    @Test("알 수 없는 그룹 값은 파싱 에러")
+    func invalidGroupThrows() {
+        #expect(throws: CLIParseError.invalidGroup("unknown")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--group", "unknown"])
+        }
+    }
+
+    @Test("0 이하 PID 값은 파싱 에러")
+    func nonPositivePIDThrows() {
+        #expect(throws: CLIParseError.invalidPID("0")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--pid", "0"])
+        }
+
+        #expect(throws: CLIParseError.invalidPID("-1")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--pid", "-1"])
+        }
+    }
+
+    @Test("음수 grace period 값은 파싱 에러")
+    func negativeGracePeriodThrows() {
+        #expect(throws: CLIParseError.invalidGracePeriod("-0.5")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--grace-period", "-0.5"])
+        }
+    }
+
+    @Test("유한하지 않은 grace period 값은 파싱 에러")
+    func nonFiniteGracePeriodThrows() {
+        #expect(throws: CLIParseError.invalidGracePeriod("nan")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--grace-period", "nan"])
+        }
+
+        #expect(throws: CLIParseError.invalidGracePeriod("inf")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--grace-period", "inf"])
+        }
+    }
+
+    @Test("지원하지 않는 명령은 파싱 에러")
+    func unknownCommandThrows() {
+        #expect(throws: CLIParseError.unknownCommand("destroy")) {
+            try parser.parse(arguments: ["destroy", "TestDrive"])
+        }
+    }
+}

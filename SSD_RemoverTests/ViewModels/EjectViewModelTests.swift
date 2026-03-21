@@ -4,6 +4,62 @@ import Foundation
 
 @Suite("EjectViewModel Tests")
 struct EjectViewModelTests {
+    private actor TerminationSignal {
+        private var hasSignaled = false
+        private var continuation: CheckedContinuation<Void, Never>?
+
+        func wait() async {
+            guard !hasSignaled else {
+                return
+            }
+
+            await withCheckedContinuation { continuation in
+                self.continuation = continuation
+            }
+        }
+
+        func signal() {
+            guard !hasSignaled else {
+                return
+            }
+
+            hasSignaled = true
+            continuation?.resume()
+            continuation = nil
+        }
+    }
+
+    private final class DelayedProcessTerminator: ProcessTerminating, @unchecked Sendable {
+        private let delayNanoseconds: UInt64
+        private let firstTerminationSignal = TerminationSignal()
+        private(set) var terminatedProcesses: [BlockingProcess] = []
+
+        init(delayNanoseconds: UInt64 = 100_000_000) {
+            self.delayNanoseconds = delayNanoseconds
+        }
+
+        func waitUntilFirstTerminationStarts() async {
+            await firstTerminationSignal.wait()
+        }
+
+        func terminate(process: BlockingProcess, gracePeriod: TimeInterval) async -> TerminationResult {
+            terminatedProcesses.append(process)
+            await firstTerminationSignal.signal()
+            try? await Task.sleep(for: .nanoseconds(delayNanoseconds))
+            return .terminated
+        }
+
+        func terminateAll(processes: [BlockingProcess], gracePeriod: TimeInterval) async -> [Int32: TerminationResult] {
+            var results: [Int32: TerminationResult] = [:]
+            for process in processes {
+                terminatedProcesses.append(process)
+                await firstTerminationSignal.signal()
+                try? await Task.sleep(for: .nanoseconds(delayNanoseconds))
+                results[process.pid] = .terminated
+            }
+            return results
+        }
+    }
 
     // MARK: - Helpers
 
@@ -131,10 +187,8 @@ struct EjectViewModelTests {
             diskEjector: MockDiskEjector()
         )
 
-        // 초기: 모두 선택 → spotlight(1) + user(2) = 3
         #expect(vm.selectedProcesses.count == 3)
 
-        // spotlight 해제 → user(2)만
         vm.toggleGroupSelection(category: .spotlight)
         #expect(vm.selectedProcesses.count == 2)
     }
@@ -191,6 +245,34 @@ struct EjectViewModelTests {
         #expect(vm.phase == .success)
         #expect(mockTerminator.terminatedProcesses.count == 2)
         #expect(mockEjector.ejectCalled)
+    }
+
+    @Test("terminateAndEject 시작 직후 confirming을 벗어나 이중 실행 창을 막음")
+    @MainActor
+    func terminateAndEjectLeavesConfirmingImmediately() async {
+        let delayedTerminator = DelayedProcessTerminator()
+        let mockEjector = MockDiskEjector()
+        mockEjector.stubbedResult = .success
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
+            processTerminator: delayedTerminator,
+            diskEjector: mockEjector
+        )
+
+        let task = Task {
+            await vm.terminateAndEject(gracePeriod: 0)
+        }
+
+        await delayedTerminator.waitUntilFirstTerminationStarts()
+
+        let expectedIntermediatePhase: EjectPhase = .terminatingProcesses(completed: 0, total: 2)
+        #expect(vm.phase == expectedIntermediatePhase)
+
+        await task.value
+        #expect(vm.phase == .success)
     }
 
     @Test("프로세스 없이 바로 eject")
@@ -250,12 +332,10 @@ struct EjectViewModelTests {
             diskEjector: mockEjector
         )
 
-        // spotlight 해제
         vm.toggleGroupSelection(category: .spotlight)
 
         await vm.terminateAndEject(gracePeriod: 0)
 
-        // user 그룹의 2개만 종료
         #expect(mockTerminator.terminatedProcesses.count == 2)
         #expect(vm.phase == .success)
     }
@@ -311,7 +391,7 @@ struct EjectViewModelTests {
 
     // MARK: - retry()
 
-    @Test("retry() 호출 시 전체 흐름 재실행 → success")
+    @Test("retry() 호출 시 전체 흐름 재실행 -> success")
     @MainActor
     func retryAfterFailureSucceeds() async {
         let mockTerminator = MockProcessTerminator()
@@ -326,11 +406,9 @@ struct EjectViewModelTests {
             diskEjector: mockEjector
         )
 
-        // 첫 번째 시도 → 실패
         await vm.terminateAndEject(gracePeriod: 0)
         #expect(vm.phase == .failure("Disk is busy"))
 
-        // 재시도 → 성공
         mockEjector.stubbedResult = .success
         await vm.retry(gracePeriod: 0)
 
@@ -428,7 +506,6 @@ struct EjectViewModelTests {
             diskEjector: mockEjector
         )
 
-        // success 상태로 전환
         await vm.terminateAndEject(gracePeriod: 0)
         #expect(vm.phase == .success)
 
@@ -455,7 +532,6 @@ struct EjectViewModelTests {
 
         await vm.rescanProcesses()
 
-        // 완료 후 false
         #expect(vm.isRescanning == false)
     }
 }
