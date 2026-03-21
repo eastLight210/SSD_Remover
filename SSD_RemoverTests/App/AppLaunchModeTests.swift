@@ -10,7 +10,7 @@ struct AppLaunchModeTests {
         #expect(mode == .cli(arguments: []))
     }
 
-    @Test("시스템 인자만 있윸면 메뉴바 모드")
+    @Test("시스템 인자만 있으면 메뉴바 모드")
     func systemArgumentsOnlyRemainMenuBar() {
         let mode = AppLaunchMode.detect(arguments: [
             "-psn_0_12345",
@@ -34,7 +34,7 @@ struct AppLaunchModeTests {
         #expect(mode == .cli(arguments: ["scan", "TestDrive"]))
     }
 
-    @Test("실제 CLI 플래그는 은지")
+    @Test("실제 CLI 플래그는 유지")
     func actualCLIFlagsRemain() {
         let mode = AppLaunchMode.detect(arguments: [
             "-ApplePersistenceIgnoreState", "YES",

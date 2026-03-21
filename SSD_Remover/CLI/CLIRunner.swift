@@ -213,7 +213,7 @@ struct CLIRunner: Sendable {
         return resolveVolume(matching: trimmedQuery, in: volumes)
     }
 
-    private func scanGroups(for: volume: ExternalVolume) async -> GroupLookupResult {
+    private func scanGroups(for volume: ExternalVolume) async -> GroupLookupResult {
         do {
             return .success(try await processScanner.scanProcesses(for: volume))
         } catch {
@@ -295,6 +295,48 @@ struct CLIRunner: Sendable {
         default:
             return .failure(ambiguousVolumeMessage(for: query, matches: matches))
         }
+    }
+
+    private func resolveVolume(
+        matching query: String,
+        in volumes: [ExternalVolume]
+    ) -> VolumeLookupResult {
+        guard !volumes.isEmpty else {
+            return .failure("No external volumes found.")
+        }
+
+        if let exactDeviceIdentifierMatch = resolveUniqueVolumeMatch(
+            for: query,
+            matches: volumes.filter { $0.deviceIdentifier.localizedCaseInsensitiveCompare(query) == .orderedSame }
+        ) {
+            return exactDeviceIdentifierMatch
+        }
+
+        if let exactMountPointMatch = resolveUniqueVolumeMatch(
+            for: query,
+            matches: volumes.filter { $0.mountPoint.path == query }
+        ) {
+            return exactMountPointMatch
+        }
+
+        if let exactNameMatch = resolveUniqueVolumeMatch(
+            for: query,
+            matches: volumes.filter { $0.name.localizedCaseInsensitiveCompare(query) == .orderedSame }
+        ) {
+            return exactNameMatch
+        }
+
+        let fuzzyMatches = volumes.filter { volume in
+            volume.name.localizedCaseInsensitiveContains(query)
+                || volume.deviceIdentifier.localizedCaseInsensitiveContains(query)
+                || volume.mountPoint.path.localizedCaseInsensitiveContains(query)
+        }
+
+        if let fuzzyMatch = resolveUniqueVolumeMatch(for: query, matches: fuzzyMatches) {
+            return fuzzyMatch
+        }
+
+        return .failure("No external volume matched query: \(query)")
     }
 
     private func ambiguousVolumeMessage(
