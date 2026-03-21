@@ -64,14 +64,10 @@ final class EjectViewModel {
             processes: targets,
             gracePeriod: gracePeriod,
             onProgress: { [self] completed, total in
-                await MainActor.run {
-                    phase = .terminatingProcesses(completed: completed, total: total)
-                }
+                phase = .terminatingProcesses(completed: completed, total: total)
             },
             onBeforeEject: { [self] in
-                await MainActor.run {
-                    phase = .ejecting
-                }
+                phase = .ejecting
             }
         )
 

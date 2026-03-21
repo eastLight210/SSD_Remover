@@ -4,6 +4,7 @@ enum CLIParseError: Error, Equatable {
     case unknownCommand(String)
     case unknownOption(String)
     case missingVolumeQuery(String)
+    case invalidVolumeQuery(String)
     case unexpectedArguments(command: String, arguments: [String])
     case missingValue(String)
     case invalidGroup(String)
@@ -15,21 +16,25 @@ extension CLIParseError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unknownCommand(let command):
-            "Unknown command: \(command)"
+            return "Unknown command: \(command)"
         case .unknownOption(let option):
-            "Unknown option: \(option)"
+            return "Unknown option: \(option)"
         case .missingVolumeQuery(let command):
-            "Missing volume query for command: \(command)"
+            return "Missing volume query for command: \(command)"
+        case .invalidVolumeQuery(let value):
+            let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            let displayValue = trimmedValue.isEmpty ? "<blank>" : value
+            return "Invalid volume query: \(displayValue)"
         case .unexpectedArguments(let command, let arguments):
-            "Unexpected extra arguments for command \(command): \(arguments.joined(separator: " "))"
+            return "Unexpected extra arguments for command \(command): \(arguments.joined(separator: " "))"
         case .missingValue(let option):
-            "Missing value for option: \(option)"
+            return "Missing value for option: \(option)"
         case .invalidGroup(let group):
-            "Invalid group: \(group)"
+            return "Invalid group: \(group)"
         case .invalidPID(let value):
-            "Invalid PID: \(value)"
+            return "Invalid PID: \(value)"
         case .invalidGracePeriod(let value):
-            "Invalid grace period: \(value)"
+            return "Invalid grace period: \(value)"
         }
     }
 }
@@ -92,13 +97,17 @@ struct CLICommandParser {
         guard let volumeQuery = arguments.first else {
             throw CLIParseError.missingVolumeQuery(command)
         }
+        let trimmedVolumeQuery = volumeQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedVolumeQuery.isEmpty else {
+            throw CLIParseError.invalidVolumeQuery(volumeQuery)
+        }
 
         let extraArguments = Array(arguments.dropFirst())
         guard extraArguments.isEmpty else {
             throw CLIParseError.unexpectedArguments(command: command, arguments: extraArguments)
         }
 
-        return volumeQuery
+        return trimmedVolumeQuery
     }
 
     private func parseTerminationArguments(
@@ -107,6 +116,10 @@ struct CLICommandParser {
     ) throws -> (volumeQuery: String, selection: CLIProcessSelection, gracePeriod: TimeInterval) {
         guard let volumeQuery = arguments.first else {
             throw CLIParseError.missingVolumeQuery(command)
+        }
+        let trimmedVolumeQuery = volumeQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedVolumeQuery.isEmpty else {
+            throw CLIParseError.invalidVolumeQuery(volumeQuery)
         }
 
         var categories: [ProcessCategory] = []
@@ -154,7 +167,7 @@ struct CLICommandParser {
         }
 
         return (
-            volumeQuery,
+            trimmedVolumeQuery,
             CLIProcessSelection(categories: categories, pids: pids),
             gracePeriod
         )

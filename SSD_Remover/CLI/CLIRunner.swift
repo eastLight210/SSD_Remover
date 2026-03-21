@@ -204,54 +204,16 @@ struct CLIRunner: Sendable {
     }
 
     private func loadVolume(matching query: String) async -> VolumeLookupResult {
-        let volumes = await refreshVolumes()
-        return resolveVolume(matching: query, in: volumes)
-    }
-
-    private func resolveVolume(
-        matching query: String,
-        in volumes: [ExternalVolume]
-    ) -> VolumeLookupResult {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        let exactIdentifierOrPathMatches = volumes.filter { volume in
-            volume.deviceIdentifier == trimmedQuery
-                || volume.mountPoint.path == trimmedQuery
-        }
-        if let lookupResult = resolveUniqueVolumeMatch(
-            for: query,
-            matches: exactIdentifierOrPathMatches
-        ) {
-            return lookupResult
+        guard !trimmedQuery.isEmpty else {
+            return .failure("Volume query cannot be blank.")
         }
 
-        let exactNameMatches = volumes.filter { volume in
-            volume.name.caseInsensitiveCompare(trimmedQuery) == .orderedSame
-        }
-        if let lookupResult = resolveUniqueVolumeMatch(
-            for: query,
-            matches: exactNameMatches
-        ) {
-            return lookupResult
-        }
-
-        let fuzzyMatches = volumes.filter { volume in
-            volume.name.localizedCaseInsensitiveContains(trimmedQuery)
-                || volume.mountPoint.path.localizedCaseInsensitiveContains(trimmedQuery)
-                || volume.deviceIdentifier.localizedCaseInsensitiveContains(trimmedQuery)
-        }
-
-        if let lookupResult = resolveUniqueVolumeMatch(
-            for: query,
-            matches: fuzzyMatches
-        ) {
-            return lookupResult
-        }
-
-        return .failure("Volume not found: \(query)")
+        let volumes = await refreshVolumes()
+        return resolveVolume(matching: trimmedQuery, in: volumes)
     }
 
-    private func scanGroups(for volume: ExternalVolume) async -> GroupLookupResult {
+    private func scanGroups(for: volume: ExternalVolume) async -> GroupLookupResult {
         do {
             return .success(try await processScanner.scanProcesses(for: volume))
         } catch {
