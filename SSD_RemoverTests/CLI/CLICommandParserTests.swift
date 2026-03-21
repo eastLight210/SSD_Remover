@@ -70,6 +70,24 @@ struct CLICommandParserTests {
         }
     }
 
+    @Test("음수 grace period 값은 파싱 에러")
+    func negativeGracePeriodThrows() {
+        #expect(throws: CLIParseError.invalidGracePeriod("-0.5")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--grace-period", "-0.5"])
+        }
+    }
+
+    @Test("비유한 grace period 값은 파싱 에러")
+    func nonFiniteGracePeriodThrows() {
+        #expect(throws: CLIParseError.invalidGracePeriod("nan")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--grace-period", "nan"])
+        }
+
+        #expect(throws: CLIParseError.invalidGracePeriod("inf")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--grace-period", "inf"])
+        }
+    }
+
     @Test("지원하지 않는 명령은 파싱 에러")
     func unknownCommandThrows() {
         #expect(throws: CLIParseError.unknownCommand("destroy")) {

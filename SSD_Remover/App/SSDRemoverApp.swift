@@ -3,10 +3,10 @@ import Darwin
 import SwiftUI
 
 final class SSDRemoverAppDelegate: NSObject, NSApplicationDelegate {
-    static var launchMode: AppLaunchMode = .menuBar
-
     func applicationDidFinishLaunching(_ notification: Notification) {
-        guard case .cli(let arguments) = Self.launchMode else {
+        let launchMode = AppLaunchMode.detect(arguments: Array(CommandLine.arguments.dropFirst()))
+
+        guard case .cli(let arguments) = launchMode else {
             return
         }
 
@@ -59,12 +59,9 @@ struct SSDRemoverApp: App {
     @NSApplicationDelegateAdaptor(SSDRemoverAppDelegate.self) private var appDelegate
     @State private var isMenuBarInserted: Bool
     @State private var viewModel: AppViewModel
-    private let launchMode: AppLaunchMode
 
     init() {
         let launchMode = AppLaunchMode.detect(arguments: Array(CommandLine.arguments.dropFirst()))
-        self.launchMode = launchMode
-        SSDRemoverAppDelegate.launchMode = launchMode
         _isMenuBarInserted = State(initialValue: launchMode.isMenuBar)
         _viewModel = State(initialValue: AppViewModel(volumeMonitorService: VolumeMonitorService()))
     }

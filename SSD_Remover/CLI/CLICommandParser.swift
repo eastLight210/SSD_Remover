@@ -141,7 +141,9 @@ struct CLICommandParser {
                 guard index < arguments.count else {
                     throw CLIParseError.missingValue(option)
                 }
-                guard let parsedGracePeriod = TimeInterval(arguments[index]) else {
+                guard let parsedGracePeriod = TimeInterval(arguments[index]),
+                      parsedGracePeriod.isFinite,
+                      parsedGracePeriod >= 0 else {
                     throw CLIParseError.invalidGracePeriod(arguments[index])
                 }
                 gracePeriod = parsedGracePeriod

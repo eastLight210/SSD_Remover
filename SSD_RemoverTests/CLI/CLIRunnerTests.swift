@@ -202,6 +202,46 @@ struct CLIRunnerTests {
         #expect(ejector.ejectCalled == false)
     }
 
+    @Test("terminate-and-eject 명령은 종료 실패가 있어도 eject 성공 시 비정상 종료 코드 반환")
+    func terminateAndEjectReportsTerminationFailures() async {
+        let volumeMonitor = MockVolumeMonitor()
+        await volumeMonitor.setVolumes([makeVolume()])
+
+        let scanner = MockProcessScanner()
+        scanner.stubbedResult = [
+            ProcessGroup(
+                category: .user,
+                processes: [
+                    makeProcess(pid: 100, command: "vim"),
+                    makeProcess(pid: 200, command: "code"),
+                ]
+            )
+        ]
+
+        let terminator = MockProcessTerminator()
+        terminator.stubbedResults = [
+            100: .terminated,
+            200: .failed("Permission denied"),
+        ]
+
+        let ejector = MockDiskEjector()
+        let result = await makeRunner(
+            volumeMonitor: volumeMonitor,
+            scanner: scanner,
+            terminator: terminator,
+            ejector: ejector
+        ).run(.terminateAndEject(
+            volumeQuery: "TestDrive",
+            selection: .all,
+            gracePeriod: 0
+        ))
+
+        #expect(result.exitCode == 1)
+        #expect(result.stdout.contains("Ejected TestDrive."))
+        #expect(result.stderr.contains("PID 200 failed"))
+        #expect(ejector.ejectCalled)
+    }
+
     @Test("eject 명령은 디스크 제거 서비스를 호출")
     func ejectVolume() async {
         let volumeMonitor = MockVolumeMonitor()
