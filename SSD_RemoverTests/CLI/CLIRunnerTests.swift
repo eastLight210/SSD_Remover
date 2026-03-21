@@ -92,6 +92,22 @@ struct CLIRunnerTests {
         #expect(result.stdout.contains("vim"))
     }
 
+    @Test("동일한 이름의 볼륨이 여러 개면 정확한 이름 조회도 모호성 에러")
+    func duplicateExactNameRequiresDisambiguation() async {
+        let volumeMonitor = MockVolumeMonitor()
+        await volumeMonitor.setVolumes([
+            makeVolume(deviceIdentifier: "disk4s1", mountPath: "/Volumes/TestDrive"),
+            makeVolume(deviceIdentifier: "disk5s1", mountPath: "/Volumes/TestDrive Clone"),
+        ])
+
+        let result = await makeRunner(volumeMonitor: volumeMonitor).run(.scan(volumeQuery: "TestDrive"))
+
+        #expect(result.exitCode == 1)
+        #expect(result.stderr.contains("Volume query is ambiguous"))
+        #expect(result.stderr.contains("disk4s1"))
+        #expect(result.stderr.contains("disk5s1"))
+    }
+
     @Test("terminate 명령은 그룹과 PID 필터를 함께 적용")
     func terminateProcessesWithFilters() async {
         let volumeMonitor = MockVolumeMonitor()

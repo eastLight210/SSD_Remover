@@ -212,12 +212,25 @@ struct CLIRunner: Sendable {
     ) -> VolumeLookupResult {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if let exactMatch = volumes.first(where: { volume in
+        let exactIdentifierOrPathMatches = volumes.filter { volume in
             volume.deviceIdentifier == trimmedQuery
                 || volume.mountPoint.path == trimmedQuery
-                || volume.name.caseInsensitiveCompare(trimmedQuery) == .orderedSame
-        }) {
-            return .success(exactMatch)
+        }
+        if let lookupResult = resolveUniqueVolumeMatch(
+            for: query,
+            matches: exactIdentifierOrPathMatches
+        ) {
+            return lookupResult
+        }
+
+        let exactNameMatches = volumes.filter { volume in
+            volume.name.caseInsensitiveCompare(trimmedQuery) == .orderedSame
+        }
+        if let lookupResult = resolveUniqueVolumeMatch(
+            for: query,
+            matches: exactNameMatches
+        ) {
+            return lookupResult
         }
 
         let fuzzyMatches = volumes.filter { volume in
@@ -226,15 +239,14 @@ struct CLIRunner: Sendable {
                 || volume.deviceIdentifier.localizedCaseInsensitiveContains(trimmedQuery)
         }
 
-        switch fuzzyMatches.count {
-        case 0:
-            return .failure("Volume not found: \(query)")
-        case 1:
-            return .success(fuzzyMatches[0])
-        default:
-            let names = fuzzyMatches.map(\.name).joined(separator: ", ")
-            return .failure("Volume query is ambiguous: \(query) (\(names))")
+        if let lookupResult = resolveUniqueVolumeMatch(
+            for: query,
+            matches: fuzzyMatches
+        ) {
+            return lookupResult
         }
+
+        return .failure("Volume not found: \(query)")
     }
 
     private func scanGroups(for volume: ExternalVolume) async -> GroupLookupResult {
@@ -305,6 +317,34 @@ struct CLIRunner: Sendable {
         }
 
         return error.localizedDescription
+    }
+
+    private func resolveUniqueVolumeMatch(
+        for query: String,
+        matches: [ExternalVolume]
+    ) -> VolumeLookupResult? {
+        switch matches.count {
+        case 0:
+            return nil
+        case 1:
+            return .success(matches[0])
+        default:
+            return .failure(ambiguousVolumeMessage(for: query, matches: matches))
+        }
+    }
+
+    private func ambiguousVolumeMessage(
+        for query: String,
+        matches: [ExternalVolume]
+    ) -> String {
+        let candidates = matches
+            .map { volume in
+                "\(volume.name) [\(volume.deviceIdentifier)] @ \(volume.mountPoint.path)"
+            }
+            .sorted()
+            .joined(separator: ", ")
+
+        return "Volume query is ambiguous: \(query) (\(candidates))"
     }
 }
 

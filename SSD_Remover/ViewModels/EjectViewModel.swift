@@ -55,6 +55,9 @@ final class EjectViewModel {
     func terminateAndEject(gracePeriod: TimeInterval = 3.0) async {
         let targets = selectedProcesses
         failedTerminations = [:]
+        phase = targets.isEmpty
+            ? .ejecting
+            : .terminatingProcesses(completed: 0, total: targets.count)
 
         let outcome = await terminateAndEjectService.execute(
             volume: volume,

@@ -4,6 +4,30 @@ import Foundation
 
 @Suite("EjectViewModel Tests")
 struct EjectViewModelTests {
+    private final class DelayedProcessTerminator: ProcessTerminating, @unchecked Sendable {
+        private let delayNanoseconds: UInt64
+        private(set) var terminatedProcesses: [BlockingProcess] = []
+
+        init(delayNanoseconds: UInt64 = 100_000_000) {
+            self.delayNanoseconds = delayNanoseconds
+        }
+
+        func terminate(process: BlockingProcess, gracePeriod: TimeInterval) async -> TerminationResult {
+            terminatedProcesses.append(process)
+            try? await Task.sleep(for: .nanoseconds(delayNanoseconds))
+            return .terminated
+        }
+
+        func terminateAll(processes: [BlockingProcess], gracePeriod: TimeInterval) async -> [Int32: TerminationResult] {
+            var results: [Int32: TerminationResult] = [:]
+            for process in processes {
+                terminatedProcesses.append(process)
+                try? await Task.sleep(for: .nanoseconds(delayNanoseconds))
+                results[process.pid] = .terminated
+            }
+            return results
+        }
+    }
 
     // MARK: - Helpers
 
@@ -191,6 +215,33 @@ struct EjectViewModelTests {
         #expect(vm.phase == .success)
         #expect(mockTerminator.terminatedProcesses.count == 2)
         #expect(mockEjector.ejectCalled)
+    }
+
+    @Test("terminateAndEject 시작 직후 confirming을 벗어나 중복 실행을 막음")
+    @MainActor
+    func terminateAndEjectLeavesConfirmingImmediately() async {
+        let delayedTerminator = DelayedProcessTerminator()
+        let mockEjector = MockDiskEjector()
+        mockEjector.stubbedResult = .success
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(includeSpotlight: false, includeUser: true),
+            processScanner: MockProcessScanner(),
+            processTerminator: delayedTerminator,
+            diskEjector: mockEjector
+        )
+
+        let task = Task {
+            await vm.terminateAndEject(gracePeriod: 0)
+        }
+
+        await Task.yield()
+
+        #expect(vm.phase == .terminatingProcesses(completed: 0, total: 2))
+
+        await task.value
+        #expect(vm.phase == .success)
     }
 
     @Test("프로세스 없이 바로 eject")

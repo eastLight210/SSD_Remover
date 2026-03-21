@@ -20,6 +20,17 @@ struct CLICommandParserTests {
         #expect(command == .scan(volumeQuery: "TestDrive"))
     }
 
+    @Test("scan/eject 명령은 추가 피연산자를 거부")
+    func rejectsExtraVolumeQueryOperands() {
+        #expect(throws: CLIParseError.unexpectedArguments(command: "scan", arguments: ["SSD"])) {
+            try parser.parse(arguments: ["scan", "Backup", "SSD"])
+        }
+
+        #expect(throws: CLIParseError.unexpectedArguments(command: "eject", arguments: ["--force"])) {
+            try parser.parse(arguments: ["eject", "MyDrive", "--force"])
+        }
+    }
+
     @Test("terminate-and-eject 명령은 선택 필터와 grace period를 파싱")
     func parsesTerminateAndEjectCommand() throws {
         let command = try parser.parse(arguments: [
@@ -45,6 +56,17 @@ struct CLICommandParserTests {
     func invalidGroupThrows() {
         #expect(throws: CLIParseError.invalidGroup("unknown")) {
             try parser.parse(arguments: ["terminate", "TestDrive", "--group", "unknown"])
+        }
+    }
+
+    @Test("0 이하 PID 값은 파싱 에러")
+    func nonPositivePIDThrows() {
+        #expect(throws: CLIParseError.invalidPID("0")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--pid", "0"])
+        }
+
+        #expect(throws: CLIParseError.invalidPID("-1")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--pid", "-1"])
         }
     }
 

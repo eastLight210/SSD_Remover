@@ -4,6 +4,7 @@ enum CLIParseError: Error, Equatable {
     case unknownCommand(String)
     case unknownOption(String)
     case missingVolumeQuery(String)
+    case unexpectedArguments(command: String, arguments: [String])
     case missingValue(String)
     case invalidGroup(String)
     case invalidPID(String)
@@ -19,6 +20,8 @@ extension CLIParseError: LocalizedError {
             "Unknown option: \(option)"
         case .missingVolumeQuery(let command):
             "Missing volume query for command: \(command)"
+        case .unexpectedArguments(let command, let arguments):
+            "Unexpected extra arguments for command \(command): \(arguments.joined(separator: " "))"
         case .missingValue(let option):
             "Missing value for option: \(option)"
         case .invalidGroup(let group):
@@ -89,6 +92,12 @@ struct CLICommandParser {
         guard let volumeQuery = arguments.first else {
             throw CLIParseError.missingVolumeQuery(command)
         }
+
+        let extraArguments = Array(arguments.dropFirst())
+        guard extraArguments.isEmpty else {
+            throw CLIParseError.unexpectedArguments(command: command, arguments: extraArguments)
+        }
+
         return volumeQuery
     }
 
@@ -123,7 +132,7 @@ struct CLICommandParser {
                 guard index < arguments.count else {
                     throw CLIParseError.missingValue(option)
                 }
-                guard let pid = Int32(arguments[index]) else {
+                guard let pid = Int32(arguments[index]), pid > 0 else {
                     throw CLIParseError.invalidPID(arguments[index])
                 }
                 pids.append(pid)
