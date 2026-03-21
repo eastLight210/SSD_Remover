@@ -4,16 +4,47 @@ import Foundation
 
 @Suite("EjectViewModel Tests")
 struct EjectViewModelTests {
+    private actor TerminationSignal {
+        private var hasSignaled = false
+        private var continuation: CheckedContinuation<Void, Never>?
+
+        func wait() async {
+            guard !hasSignaled else {
+                return
+            }
+
+            await withCheckedContinuation { continuation in
+                self.continuation = continuation
+            }
+        }
+
+        func signal() {
+            guard !hasSignaled else {
+                return
+            }
+
+            hasSignaled = true
+            continuation?.resume()
+            continuation = nil
+        }
+    }
+
     private final class DelayedProcessTerminator: ProcessTerminating, @unchecked Sendable {
         private let delayNanoseconds: UInt64
+        private let firstTerminationSignal = TerminationSignal()
         private(set) var terminatedProcesses: [BlockingProcess] = []
 
         init(delayNanoseconds: UInt64 = 100_000_000) {
             self.delayNanoseconds = delayNanoseconds
         }
 
+        func waitUntilFirstTerminationStarts() async {
+            await firstTerminationSignal.wait()
+        }
+
         func terminate(process: BlockingProcess, gracePeriod: TimeInterval) async -> TerminationResult {
             terminatedProcesses.append(process)
+            await firstTerminationSignal.signal()
             try? await Task.sleep(for: .nanoseconds(delayNanoseconds))
             return .terminated
         }
@@ -22,6 +53,7 @@ struct EjectViewModelTests {
             var results: [Int32: TerminationResult] = [:]
             for process in processes {
                 terminatedProcesses.append(process)
+                await firstTerminationSignal.signal()
                 try? await Task.sleep(for: .nanoseconds(delayNanoseconds))
                 results[process.pid] = .terminated
             }
@@ -234,12 +266,9 @@ struct EjectViewModelTests {
             await vm.terminateAndEject(gracePeriod: 0)
         }
 
-        let expectedIntermediatePhase: EjectPhase = .terminatingProcesses(completed: 0, total: 2)
-        let deadline = Date().addingTimeInterval(1)
-        while vm.phase != expectedIntermediatePhase && Date() < deadline {
-            try? await Task.sleep(for: .milliseconds(10))
-        }
+        await delayedTerminator.waitUntilFirstTerminationStarts()
 
+        let expectedIntermediatePhase: EjectPhase = .terminatingProcesses(completed: 0, total: 2)
         #expect(vm.phase == expectedIntermediatePhase)
 
         await task.value
