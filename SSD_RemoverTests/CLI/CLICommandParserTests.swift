@@ -77,7 +77,7 @@ struct CLICommandParserTests {
         }
     }
 
-    @Test("비유한 grace period 값은 파싱 에러")
+    @Test("유한하지 않은 grace period 값은 파싱 에러")
     func nonFiniteGracePeriodThrows() {
         #expect(throws: CLIParseError.invalidGracePeriod("nan")) {
             try parser.parse(arguments: ["terminate", "TestDrive", "--grace-period", "nan"])

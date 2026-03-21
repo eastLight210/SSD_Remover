@@ -6,8 +6,8 @@ struct TerminateAndEjectOutcome: Sendable {
 }
 
 struct TerminateAndEjectService: Sendable {
-    typealias ProgressHandler = @Sendable (_ completed: Int, _ total: Int) async -> Void
-    typealias PhaseHandler = @Sendable () async -> Void
+    typealias ProgressHandler = (_ completed: Int, _ total: Int) async -> Void
+    typealias PhaseHandler = () async -> Void
 
     private let processTerminator: ProcessTerminating
     private let diskEjector: DiskEjecting

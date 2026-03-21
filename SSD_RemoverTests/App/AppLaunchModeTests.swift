@@ -14,7 +14,7 @@ struct AppLaunchModeTests {
         #expect(mode == .menuBar)
     }
 
-    @Test("실스템 인자 뒤의 값은 건너뛰고 실제 CLI 인자만 유지")
+    @Test("시스템 인자 뒤의 값은 건너뛰고 실제 CLI 인자만 유지")
     func systemArgumentValuesDoNotLeakIntoCLIArguments() {
         let mode = AppLaunchMode.detect(arguments: [
             "-psn_0_12345",
