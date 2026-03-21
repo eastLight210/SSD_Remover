@@ -19,8 +19,7 @@ final class EjectViewModel {
 
     let volume: ExternalVolume
     private let processScanner: ProcessScanning
-    private let processTerminator: ProcessTerminating
-    private let diskEjector: DiskEjecting
+    private let terminateAndEjectService: TerminateAndEjectService
 
     init(
         volume: ExternalVolume,
@@ -32,8 +31,10 @@ final class EjectViewModel {
         self.volume = volume
         self.processGroups = processGroups
         self.processScanner = processScanner
-        self.processTerminator = processTerminator
-        self.diskEjector = diskEjector
+        self.terminateAndEjectService = TerminateAndEjectService(
+            processTerminator: processTerminator,
+            diskEjector: diskEjector
+        )
     }
 
     var selectedProcesses: [BlockingProcess] {
@@ -53,27 +54,31 @@ final class EjectViewModel {
 
     func terminateAndEject(gracePeriod: TimeInterval = 3.0) async {
         let targets = selectedProcesses
-        let total = targets.count
         failedTerminations = [:]
 
-        if total > 0 {
-            phase = .terminatingProcesses(completed: 0, total: total)
-
-            var completed = 0
-            for process in targets {
-                let result = await processTerminator.terminate(process: process, gracePeriod: gracePeriod)
-                if case .failed(let message) = result {
-                    failedTerminations[process.pid] = message
+        let outcome = await terminateAndEjectService.execute(
+            volume: volume,
+            processes: targets,
+            gracePeriod: gracePeriod,
+            onProgress: { [self] completed, total in
+                await MainActor.run {
+                    phase = .terminatingProcesses(completed: completed, total: total)
                 }
-                completed += 1
-                phase = .terminatingProcesses(completed: completed, total: total)
+            },
+            onBeforeEject: { [self] in
+                await MainActor.run {
+                    phase = .ejecting
+                }
+            }
+        )
+
+        failedTerminations = outcome.terminationResults.reduce(into: [:]) { partialResult, entry in
+            if case .failed(let message) = entry.value {
+                partialResult[entry.key] = message
             }
         }
 
-        phase = .ejecting
-
-        let result = await diskEjector.eject(volume: volume)
-        switch result {
+        switch outcome.ejectResult {
         case .success:
             phase = .success
         case .failed(let message):

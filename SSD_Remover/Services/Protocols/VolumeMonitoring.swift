@@ -7,7 +7,8 @@ protocol VolumeURLProviding: Sendable {
     ) -> [URL]?
 }
 
-extension FileManager: VolumeURLProviding, @unchecked Sendable {}
+extension FileManager: VolumeURLProviding {}
+extension FileManager: @retroactive @unchecked Sendable {}
 
 protocol VolumeMonitoring: Sendable {
     var volumes: [ExternalVolume] { get async }

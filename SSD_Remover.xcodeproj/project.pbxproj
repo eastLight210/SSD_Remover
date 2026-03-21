@@ -10,6 +10,14 @@
 		0D221D58FF8457F0C20632F6 /* ProcessGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827D61DFB4405A4D0600103C /* ProcessGroupTests.swift */; };
 		0E8C26E49FAAB476046D34EE /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A8DC44EC985473E123C4DBC /* Constants.swift */; };
 		16B5B2E31A57E5B9CC736420 /* ExternalVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C0AC539FD789A1984AA1628 /* ExternalVolume.swift */; };
+		A1B2C3D4E5F60718293A4B5C /* CLICommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F40516273849A5B6C7 /* CLICommand.swift */; };
+		A1B2C3D4E5F60718293A4B5D /* CLICommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F40516273849A5B6C8 /* CLICommandParser.swift */; };
+		A1B2C3D4E5F60718293A4B5E /* CLIRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F40516273849A5B6C9 /* CLIRunner.swift */; };
+		A1B2C3D4E5F60718293A4B5F /* TerminateAndEjectService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F40516273849A5B6CA /* TerminateAndEjectService.swift */; };
+		A1B2C3D4E5F60718293A4B60 /* AppLaunchMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F40516273849A5B6CB /* AppLaunchMode.swift */; };
+		B1C2D3E4F5061728394A5B6C /* CLICommandParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F30415263748495A6B7C /* CLICommandParserTests.swift */; };
+		B1C2D3E4F5061728394A5B6D /* CLIRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F30415263748495A6B7D /* CLIRunnerTests.swift */; };
+		B1C2D3E4F5061728394A5B6E /* MockVolumeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F30415263748495A6B7E /* MockVolumeMonitor.swift */; };
 		203D493E1756903BA0B57B88 /* ConstantsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395BB0A7ABBEB3C2CAE9384D /* ConstantsTests.swift */; };
 		25108625AEF2D39B3EDB8525 /* DiskEjectService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B43539417899683ECA8AF3 /* DiskEjectService.swift */; };
 		28512CFAF3AAC0BC9E318B59 /* VolumeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3549927A611B9AC179735 /* VolumeRowView.swift */; };
@@ -113,6 +121,14 @@
 		90E268C0708A0A4ECEF3A095 /* ProcessTerminatorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessTerminatorService.swift; sourceTree = "<group>"; };
 		9422C8947D09E9BD10911F6D /* DiskEjectServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskEjectServiceTests.swift; sourceTree = "<group>"; };
 		9C0AC539FD789A1984AA1628 /* ExternalVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalVolume.swift; sourceTree = "<group>"; };
+		C1D2E3F40516273849A5B6C7 /* CLICommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLICommand.swift; sourceTree = "<group>"; };
+		C1D2E3F40516273849A5B6C8 /* CLICommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLICommandParser.swift; sourceTree = "<group>"; };
+		C1D2E3F40516273849A5B6C9 /* CLIRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIRunner.swift; sourceTree = "<group>"; };
+		C1D2E3F40516273849A5B6CA /* TerminateAndEjectService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminateAndEjectService.swift; sourceTree = "<group>"; };
+		C1D2E3F40516273849A5B6CB /* AppLaunchMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchMode.swift; sourceTree = "<group>"; };
+		D1E2F30415263748495A6B7C /* CLICommandParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLICommandParserTests.swift; sourceTree = "<group>"; };
+		D1E2F30415263748495A6B7D /* CLIRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIRunnerTests.swift; sourceTree = "<group>"; };
+		D1E2F30415263748495A6B7E /* MockVolumeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockVolumeMonitor.swift; sourceTree = "<group>"; };
 		A03C6B2BBE2AD8958FE66583 /* SSD_RemoverTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SSD_RemoverTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2381D5FEE3E835BCD02C9CF /* TerminateAndEjectChainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminateAndEjectChainTests.swift; sourceTree = "<group>"; };
 		A981A0D5F7211ED75FEA7836 /* ProcessGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessGroup.swift; sourceTree = "<group>"; };
@@ -201,6 +217,7 @@
 			isa = PBXGroup;
 			children = (
 				BFCFC78EFBA11053FEFFD2D2 /* App */,
+				E1F2031425364758697A8B9C /* CLI */,
 				6F9278919D855D16C839F267 /* Models */,
 				3C08ACD96C72E30B5266966D /* Resources */,
 				A0069B252410EE8983C59CC9 /* Services */,
@@ -233,6 +250,7 @@
 		9104B02A43710CF5870D19D4 /* SSD_RemoverTests */ = {
 			isa = PBXGroup;
 			children = (
+				E1F2031425364758697A8B9D /* CLI */,
 				876ACF0F6FD91C01844B49B1 /* Integration */,
 				F9F25D356E4B627DB159FE13 /* Mocks */,
 				EBEADFCA1BA46366B95C6C4D /* Models */,
@@ -263,6 +281,7 @@
 				17949EF2CB5E1ECABF48F026 /* PrivilegedExecutor.swift */,
 				B1B1C9A141FE502E1ED2B007 /* ProcessScannerService.swift */,
 				90E268C0708A0A4ECEF3A095 /* ProcessTerminatorService.swift */,
+				C1D2E3F40516273849A5B6CA /* TerminateAndEjectService.swift */,
 				C248C49504AD67A10BC1F6BF /* ShellExecutor.swift */,
 				E7F04D43058F069204963637 /* VolumeMonitorService.swift */,
 				E7B1CC71CB25BCC4AD1C4B1C /* Protocols */,
@@ -284,9 +303,29 @@
 		BFCFC78EFBA11053FEFFD2D2 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				C1D2E3F40516273849A5B6CB /* AppLaunchMode.swift */,
 				112778C0C05881F4274CBF08 /* SSDRemoverApp.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		E1F2031425364758697A8B9C /* CLI */ = {
+			isa = PBXGroup;
+			children = (
+				C1D2E3F40516273849A5B6C7 /* CLICommand.swift */,
+				C1D2E3F40516273849A5B6C8 /* CLICommandParser.swift */,
+				C1D2E3F40516273849A5B6C9 /* CLIRunner.swift */,
+			);
+			path = CLI;
+			sourceTree = "<group>";
+		};
+		E1F2031425364758697A8B9D /* CLI */ = {
+			isa = PBXGroup;
+			children = (
+				D1E2F30415263748495A6B7C /* CLICommandParserTests.swift */,
+				D1E2F30415263748495A6B7D /* CLIRunnerTests.swift */,
+			);
+			path = CLI;
 			sourceTree = "<group>";
 		};
 		E7B1CC71CB25BCC4AD1C4B1C /* Protocols */ = {
@@ -329,6 +368,7 @@
 				B3D62546C5326EB337DE35BE /* MockProcessScanner.swift */,
 				74FE16EC473BB394D3648A78 /* MockProcessTerminator.swift */,
 				B496836C43E8DCBB5D861924 /* MockShellExecutor.swift */,
+				D1E2F30415263748495A6B7E /* MockVolumeMonitor.swift */,
 				7D9F42795089DB52B9338740 /* MockVolumeURLProvider.swift */,
 			);
 			path = Mocks;
@@ -416,6 +456,8 @@
 			files = (
 				D7B1752C6213CE871D4895F8 /* AppViewModelTests.swift in Sources */,
 				B84B593F9FF08EE61C521FF8 /* BlockingProcessTests.swift in Sources */,
+				B1C2D3E4F5061728394A5B6C /* CLICommandParserTests.swift in Sources */,
+				B1C2D3E4F5061728394A5B6D /* CLIRunnerTests.swift in Sources */,
 				203D493E1756903BA0B57B88 /* ConstantsTests.swift in Sources */,
 				52663059FC241B23D8075AB8 /* DiskEjectServiceTests.swift in Sources */,
 				A646EA6D5922A5397166BB27 /* DiskInfoParserTests.swift in Sources */,
@@ -428,6 +470,7 @@
 				2CBF8FB46319EC451530836D /* MockProcessScanner.swift in Sources */,
 				EDA0A79D9E83383C1107C2FB /* MockProcessTerminator.swift in Sources */,
 				E2C38BA83CB29130407656DA /* MockShellExecutor.swift in Sources */,
+				B1C2D3E4F5061728394A5B6E /* MockVolumeMonitor.swift in Sources */,
 				D02457966EE88A9C4015E2F1 /* MockVolumeURLProvider.swift in Sources */,
 				318770EB660B5C7FCF949D21 /* PrivilegedExecutorTests.swift in Sources */,
 				53D3E90D7DA36585D42A4A20 /* ProcessClassifierTests.swift in Sources */,
@@ -445,8 +488,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F60718293A4B60 /* AppLaunchMode.swift in Sources */,
 				8F6F717A1761A20DB4BF71C6 /* AppViewModel.swift in Sources */,
 				55F0BB1A3029763D8A6287DC /* BlockingProcess.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5C /* CLICommand.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5D /* CLICommandParser.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5E /* CLIRunner.swift in Sources */,
 				0E8C26E49FAAB476046D34EE /* Constants.swift in Sources */,
 				553D92ABD84F6452C465E4F4 /* ContentView.swift in Sources */,
 				25108625AEF2D39B3EDB8525 /* DiskEjectService.swift in Sources */,
@@ -471,6 +518,7 @@
 				42A6EC9B2C47AC2C0275FB2E /* ShellExecuting.swift in Sources */,
 				B7A1678FB8AB09F4E905FBAF /* ShellExecutor.swift in Sources */,
 				3FE475E2002B423227CFE57F /* SpotlightWarningView.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5F /* TerminateAndEjectService.swift in Sources */,
 				F3898BC5DE58C2C6C20F74D7 /* VolumeListView.swift in Sources */,
 				6C0D539FC293E874A1121313 /* VolumeMonitorService.swift in Sources */,
 				508B7E95CD62A4DCA1DB4FB3 /* VolumeMonitoring.swift in Sources */,
