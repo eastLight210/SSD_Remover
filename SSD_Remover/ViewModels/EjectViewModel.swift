@@ -16,6 +16,7 @@ final class EjectViewModel {
     private(set) var failedTerminations: [Int32: String] = [:]
 
     private(set) var isRescanning = false
+    private(set) var rescanError: String?
 
     let volume: ExternalVolume
     private let processScanner: ProcessScanning
@@ -94,10 +95,11 @@ final class EjectViewModel {
     func rescanProcesses() async {
         guard phase == .confirming else { return }
         isRescanning = true
+        rescanError = nil
         do {
             processGroups = try await processScanner.scanProcesses(for: volume)
         } catch {
-            // 스캔 실패 시 기존 목록 유지
+            rescanError = error.localizedDescription
         }
         isRescanning = false
     }

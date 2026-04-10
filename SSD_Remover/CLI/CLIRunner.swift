@@ -204,13 +204,8 @@ struct CLIRunner: Sendable {
     }
 
     private func loadVolume(matching query: String) async -> VolumeLookupResult {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty else {
-            return .failure("Volume query cannot be blank.")
-        }
-
         let volumes = await refreshVolumes()
-        return resolveVolume(matching: trimmedQuery, in: volumes)
+        return resolveVolume(matching: query, in: volumes)
     }
 
     private func scanGroups(for volume: ExternalVolume) async -> GroupLookupResult {

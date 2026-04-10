@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import os
 
 protocol CLICommandExecuting: Sendable {
     func run(arguments: [String]) async -> CLIExecutionResult
@@ -60,24 +61,18 @@ struct CLIExecutionResultEmitter {
     }
 }
 
-private final class BlockingCLIExecutionBox: @unchecked Sendable {
+private final class BlockingCLIExecutionBox: Sendable {
     private let semaphore = DispatchSemaphore(value: 0)
-    private let lock = NSLock()
-    private var result: CLIExecutionResult?
+    private let state = OSAllocatedUnfairLock(initialState: CLIExecutionResult?.none)
 
     func store(_ result: CLIExecutionResult) {
-        lock.lock()
-        self.result = result
-        lock.unlock()
+        state.withLock { $0 = result }
         semaphore.signal()
     }
 
     func waitForResult() -> CLIExecutionResult {
         semaphore.wait()
-
-        lock.lock()
-        defer { lock.unlock() }
-        return result ?? .failure("CLI execution failed before producing a result.")
+        return state.withLock { $0 } ?? .failure("CLI execution failed before producing a result.")
     }
 }
 

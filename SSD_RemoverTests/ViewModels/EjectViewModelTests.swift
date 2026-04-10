@@ -534,4 +534,50 @@ struct EjectViewModelTests {
 
         #expect(vm.isRescanning == false)
     }
+
+    @Test("재스캔 실패 시 rescanError에 에러 메시지 저장")
+    @MainActor
+    func rescanProcessesSetsRescanErrorOnFailure() async {
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedError = ShellError.executionFailed(exitCode: 1, stderr: "scan failed")
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(),
+            processScanner: mockScanner,
+            processTerminator: MockProcessTerminator(),
+            diskEjector: MockDiskEjector()
+        )
+
+        #expect(vm.rescanError == nil)
+
+        await vm.rescanProcesses()
+
+        #expect(vm.rescanError != nil)
+        #expect(vm.phase == .confirming)
+    }
+
+    @Test("재스캔 성공 시 rescanError 초기화")
+    @MainActor
+    func rescanProcessesClearsRescanErrorOnSuccess() async {
+        let mockScanner = MockProcessScanner()
+        mockScanner.stubbedError = ShellError.executionFailed(exitCode: 1, stderr: "scan failed")
+
+        let vm = EjectViewModel(
+            volume: makeSampleVolume(),
+            processGroups: makeGroups(),
+            processScanner: mockScanner,
+            processTerminator: MockProcessTerminator(),
+            diskEjector: MockDiskEjector()
+        )
+
+        await vm.rescanProcesses()
+        #expect(vm.rescanError != nil)
+
+        mockScanner.stubbedError = nil
+        mockScanner.stubbedResult = makeGroups()
+        await vm.rescanProcesses()
+
+        #expect(vm.rescanError == nil)
+    }
 }

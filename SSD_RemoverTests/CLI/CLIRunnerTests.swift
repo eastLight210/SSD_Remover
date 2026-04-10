@@ -92,17 +92,6 @@ struct CLIRunnerTests {
         #expect(result.stdout.contains("vim"))
     }
 
-    @Test("공백 볼륨 쿼리는 볼륨 조회 전에 즉시 실패")
-    func blankVolumeQueryFailsBeforeRefreshingVolumes() async {
-        let volumeMonitor = MockVolumeMonitor()
-
-        let result = await makeRunner(volumeMonitor: volumeMonitor).run(.scan(volumeQuery: "   "))
-
-        #expect(result.exitCode == 1)
-        #expect(result.stderr == "Volume query cannot be blank.")
-        #expect(await volumeMonitor.refreshCallCount == 0)
-    }
-
     @Test("동일한 이름의 볼륨이 여러 개면 정확한 이름 조회도 모호성 에러")
     func duplicateExactNameRequiresDisambiguation() async {
         let volumeMonitor = MockVolumeMonitor()
@@ -174,7 +163,7 @@ struct CLIRunnerTests {
             ejector: ejector
         ).run(.terminateAndEject(
             volumeQuery: "TestDrive",
-            selection: .all,
+            selection: .unfiltered,
             gracePeriod: 0
         ))
 
@@ -243,7 +232,7 @@ struct CLIRunnerTests {
             ejector: ejector
         ).run(.terminateAndEject(
             volumeQuery: "TestDrive",
-            selection: .all,
+            selection: .unfiltered,
             gracePeriod: 0
         ))
 

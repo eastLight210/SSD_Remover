@@ -13,7 +13,7 @@ struct CLIProcessSelection: Equatable, Sendable {
     let categories: Set<ProcessCategory>
     let pids: Set<Int32>
 
-    static let all = CLIProcessSelection()
+    static let unfiltered = CLIProcessSelection()
 
     init(
         categories: [ProcessCategory] = [],
