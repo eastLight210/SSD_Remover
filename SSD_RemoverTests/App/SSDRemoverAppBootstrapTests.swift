@@ -27,12 +27,12 @@ struct SSDRemoverAppBootstrapTests {
     func cliBootstrapSkipsMenuBarViewModel() {
         var viewModelBuildCount = 0
 
-        let bootstrap = SSDRemoverAppBootstrap(arguments: []) {
+        let bootstrap = SSDRemoverAppBootstrap(arguments: ["help"]) {
             viewModelBuildCount += 1
             return AppViewModel(volumeMonitorService: VolumeMonitorService())
         }
 
-        #expect(bootstrap.launchMode == .cli(arguments: []))
+        #expect(bootstrap.launchMode == .cli(arguments: ["help"]))
         #expect(bootstrap.viewModel == nil)
         #expect(viewModelBuildCount == 0)
     }

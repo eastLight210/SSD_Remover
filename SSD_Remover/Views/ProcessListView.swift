@@ -41,13 +41,12 @@ struct ProcessListView: View {
 
                 Spacer()
 
-                Button("Terminate & Eject") {
+                Button(viewModel.processGroups.isEmpty ? "Eject" : "Terminate & Eject") {
                     Task {
                         await viewModel.terminateAndEject()
                     }
                 }
                 .keyboardShortcut(.defaultAction)
-                .disabled(viewModel.selectedProcesses.isEmpty)
             }
             .padding(12)
         }

@@ -38,7 +38,7 @@ enum AppLaunchMode: Equatable, Sendable {
         }
 
         if filteredArguments.isEmpty {
-            return arguments.isEmpty ? .cli(arguments: []) : .menuBar
+            return .menuBar
         }
 
         return .cli(arguments: filteredArguments)

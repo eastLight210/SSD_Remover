@@ -3,11 +3,11 @@ import Testing
 
 @Suite("AppLaunchMode Tests")
 struct AppLaunchModeTests {
-    @Test("터미널에서 인자 없이 실행하면 CLI help 모드")
-    func emptyArgumentsRemainCLI() {
+    @Test("인자 없이 실행하면 메뉴바 모드")
+    func emptyArgumentsDefaultToMenuBar() {
         let mode = AppLaunchMode.detect(arguments: [])
 
-        #expect(mode == .cli(arguments: []))
+        #expect(mode == .menuBar)
     }
 
     @Test("시스템 인자만 있으면 메뉴바 모드")
