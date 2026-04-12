@@ -1,6 +1,6 @@
 name: SSD_Remover
 options:
-  bundleIdPrefix: com.donghyeok.kim
+  bundleIdPrefix: com.honeybadger210
   deploymentTarget:
     macOS: "14.0"
   xcodeVersion: "26.0"
@@ -22,7 +22,7 @@ targets:
           - "**/Info.plist"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.donghyeok.kim.SSD-Remover
+        PRODUCT_BUNDLE_IDENTIFIER: com.honeybadger210.SSD-Remover
         CODE_SIGN_ENTITLEMENTS: SSD_Remover/SSD_Remover.entitlements
         ENABLE_APP_SANDBOX: NO
         SWIFT_STRICT_CONCURRENCY: complete
@@ -42,7 +42,7 @@ targets:
       - target: SSD_Remover
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.donghyeok.kim.SSD-RemoverTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.honeybadger210.SSD-RemoverTests
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/SSD_Remover.app/Contents/MacOS/SSD_Remover"
         BUNDLE_LOADER: "$(TEST_HOST)"
