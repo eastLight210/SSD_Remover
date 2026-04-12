@@ -25,13 +25,20 @@ macOS 메뉴바 유틸리티로, 외장 SSD/디스크를 안전하게 추출할 
 - **로그인 시 자동 실행** - 시스템 시작 시 자동 실행 설정
 - **CLI 모드** - 터미널에서 자동화 용도로 사용 가능
 
+## 설치
+
+1. [최신 릴리즈](https://github.com/eastLight210/SSD_Remover/releases/latest)에서 `SSD_Remover.zip` 다운로드
+2. 압축 해제
+3. `SSD_Remover.app`을 Applications 폴더로 이동
+4. 처음 실행 시 "확인되지 않은 개발자" 경고가 뜨면 우클릭 > 열기로 실행
+
 ## 요구 사항
 
 - macOS 14.0 (Sonoma) 이상
-- Xcode 26.0 이상
-- Swift 6.2
 
-## 빌드
+## 소스에서 빌드
+
+Xcode 26.0 이상, Swift 6.2 필요.
 
 [XcodeGen](https://github.com/yonaskolb/XcodeGen)으로 프로젝트를 생성합니다.
 

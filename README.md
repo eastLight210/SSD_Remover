@@ -25,13 +25,20 @@ It automatically detects processes blocking a disk, lets you selectively termina
 - **Launch at Login** - Auto-launch on system startup
 - **CLI Mode** - Available for terminal automation
 
+## Installation
+
+1. Download `SSD_Remover.zip` from the [latest release](https://github.com/eastLight210/SSD_Remover/releases/latest)
+2. Unzip the file
+3. Move `SSD_Remover.app` to the Applications folder
+4. On first launch, if you see an "unidentified developer" warning, right-click > Open to run
+
 ## Requirements
 
 - macOS 14.0 (Sonoma) or later
-- Xcode 26.0 or later
-- Swift 6.2
 
-## Build
+## Build from Source
+
+Requires Xcode 26.0+ and Swift 6.2.
 
 Generate the Xcode project with [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
