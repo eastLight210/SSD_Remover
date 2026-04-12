@@ -32,3 +32,4 @@ playground.xcworkspace
 # Archives
 *.xcarchive
 WORKFLOW.md
+.omx/
