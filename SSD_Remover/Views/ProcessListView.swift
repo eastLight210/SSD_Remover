@@ -63,11 +63,15 @@ struct ProcessListView: View {
 
     private var blockersContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            StatusBanner(
-                style: .warning,
-                title: "\(viewModel.totalProcessCount) blocking processes",
-                message: "Choose only processes you want to terminate."
-            )
+            if viewModel.hasSpotlightProcesses {
+                SpotlightWarningView(blockingProcessCount: viewModel.totalProcessCount)
+            } else {
+                StatusBanner(
+                    style: .warning,
+                    title: "\(viewModel.totalProcessCount) blocking processes",
+                    message: "Choose only processes you want to terminate."
+                )
+            }
 
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 8) {

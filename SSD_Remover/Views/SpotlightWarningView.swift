@@ -79,11 +79,13 @@ struct StatusBanner: View {
 }
 
 struct SpotlightWarningView: View {
+    let blockingProcessCount: Int
+
     var body: some View {
         StatusBanner(
             style: .warning,
-            title: "Spotlight is indexing this volume",
-            message: "Terminating mds may interrupt indexing."
+            title: "\(blockingProcessCount) blocking processes",
+            message: "Spotlight is indexing this volume. Terminating mds may interrupt indexing."
         )
     }
 }

@@ -48,6 +48,21 @@ struct ContentView: View {
         .onChange(of: viewModel.scanState) { _, state in
             announceScanState(state)
         }
+        .onChange(of: viewModel.selectedVolume?.id) { _, selectedVolumeID in
+            guard selectedVolumeID == nil else { return }
+            scanTask?.cancel()
+            scanTask = nil
+
+            guard let phase = ejectViewModel?.phase else { return }
+            switch phase {
+            case .confirming, .failure:
+                ejectTask?.cancel()
+                ejectTask = nil
+                ejectViewModel = nil
+            case .terminatingProcesses, .ejecting, .success:
+                break
+            }
+        }
         .onChange(of: ejectViewModel?.phase) { _, phase in
             announceEjectPhase(phase)
         }

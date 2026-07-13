@@ -37,7 +37,7 @@ final class AppViewModel {
         volumeUpdatesTask = Task { [weak self] in
             for await volumes in updates {
                 guard !Task.isCancelled else { break }
-                self?.volumes = volumes
+                self?.applyVolumeUpdate(volumes)
             }
         }
         await refreshVolumes()
@@ -52,7 +52,7 @@ final class AppViewModel {
     func refreshVolumes() async {
         isLoading = true
         await volumeMonitorService.refreshVolumes()
-        volumes = await volumeMonitorService.volumes
+        applyVolumeUpdate(await volumeMonitorService.volumes)
         isLoading = false
     }
 
@@ -108,6 +108,30 @@ final class AppViewModel {
 
     func affectedVolumes(for volume: ExternalVolume) -> [ExternalVolume] {
         volumes.filter { $0.parentWholeDisk == volume.parentWholeDisk }
+    }
+
+    private func applyVolumeUpdate(_ updatedVolumes: [ExternalVolume]) {
+        volumes = updatedVolumes
+
+        guard let selectedVolume else { return }
+        guard let refreshedVolume = updatedVolumes.first(where: { $0.id == selectedVolume.id }) else {
+            deselectVolume()
+            return
+        }
+
+        self.selectedVolume = refreshedVolume
+        switch scanState {
+        case .idle:
+            break
+        case .scanning:
+            scanState = .scanning(refreshedVolume)
+        case .ready:
+            scanState = .ready(refreshedVolume)
+        case .blocked(_, let processCount):
+            scanState = .blocked(refreshedVolume, processCount: processCount)
+        case .failed(_, let message):
+            scanState = .failed(refreshedVolume, message: message)
+        }
     }
 
     #if DEBUG
