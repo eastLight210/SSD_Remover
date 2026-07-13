@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var scanTask: Task<Void, Never>?
     @State private var ejectTask: Task<Void, Never>?
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var isQuitConfirmationPresented = false
 
     init(viewModel: AppViewModel, autoSelectFirstVolume: Bool = false) {
         self.viewModel = viewModel
@@ -65,6 +66,14 @@ struct ContentView: View {
         }
         .onChange(of: ejectViewModel?.phase) { _, phase in
             announceEjectPhase(phase)
+        }
+        .alert("Quit SSD Remover?", isPresented: $isQuitConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Quit", role: .destructive) {
+                quitApplication()
+            }
+        } message: {
+            Text("A disk removal is in progress. Quitting now may interrupt it.")
         }
     }
 
@@ -146,36 +155,36 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder
     private var headerTrailingContent: some View {
-        if ejectViewModel == nil, viewModel.scanState == .idle {
+        HStack(spacing: 6) {
+            Text(headerDetail)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+
             Menu {
                 Button("Refresh Drives", systemImage: "arrow.clockwise") {
                     Task { await viewModel.refreshVolumes() }
                 }
+                .disabled(ejectViewModel != nil || viewModel.scanState != .idle)
 
                 Toggle("Launch at Login", isOn: $launchAtLogin)
 
                 Divider()
 
                 Button("Quit SSD Remover", systemImage: "power") {
-                    NSApplication.shared.terminate(nil)
+                    requestQuit()
                 }
             } label: {
-                Text(driveCountLabel)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                Image(systemName: "ellipsis.circle")
+                    .font(.body)
+                    .contentShape(Rectangle())
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
             .help("Open app actions")
-            .accessibilityLabel("App actions, \(driveCountLabel)")
-        } else {
-            Text(headerDetail)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+            .accessibilityLabel("App actions")
         }
     }
 
@@ -224,6 +233,28 @@ struct ContentView: View {
 
     private var driveCountLabel: String {
         "\(viewModel.volumes.count) \(viewModel.volumes.count == 1 ? "drive" : "drives")"
+    }
+
+    private var isDiskRemovalInProgress: Bool {
+        guard let phase = ejectViewModel?.phase else { return false }
+        switch phase {
+        case .terminatingProcesses, .ejecting:
+            return true
+        case .confirming, .success, .failure:
+            return false
+        }
+    }
+
+    private func requestQuit() {
+        if isDiskRemovalInProgress {
+            isQuitConfirmationPresented = true
+        } else {
+            quitApplication()
+        }
+    }
+
+    private func quitApplication() {
+        NSApplication.shared.terminate(nil)
     }
 
     private func beginScan(for volume: ExternalVolume) {
