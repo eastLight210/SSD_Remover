@@ -13,7 +13,7 @@ struct ProcessGroup: Identifiable, Equatable, Sendable {
 
     var id: ProcessCategory { category }
 
-    init(category: ProcessCategory, processes: [BlockingProcess], isSelected: Bool = true) {
+    init(category: ProcessCategory, processes: [BlockingProcess], isSelected: Bool = false) {
         self.category = category
         self.processes = processes
         self.isSelected = isSelected

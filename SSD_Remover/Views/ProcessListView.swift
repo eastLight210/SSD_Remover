@@ -2,95 +2,118 @@ import SwiftUI
 
 struct ProcessListView: View {
     @Bindable var viewModel: EjectViewModel
-    var onCancel: (() -> Void)?
+    let affectedVolumes: [ExternalVolume]
+    let onCancel: () -> Void
+    let onConfirm: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
-            if viewModel.hasSpotlightProcesses {
-                SpotlightWarningView()
-            }
-
-            ScrollView {
-                LazyVStack(spacing: 8) {
-                    ForEach(viewModel.processGroups) { group in
-                        ProcessGroupSection(
-                            group: group,
-                            onToggle: {
-                                viewModel.toggleGroupSelection(category: group.category)
-                            }
-                        )
-                    }
+            VStack(alignment: .leading, spacing: 8) {
+                if viewModel.totalProcessCount == 0 {
+                    noBlockersContent
+                } else {
+                    blockersContent
                 }
-                .padding(12)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, viewModel.totalProcessCount == 0 ? 16 : 12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(Color.appCanvas)
             .overlay {
                 if viewModel.isRescanning {
-                    ProgressView()
+                    ProgressView("Scanning…")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(.ultraThinMaterial)
                 }
             }
 
-            Divider()
-
-            HStack {
-                Button("Cancel") {
-                    onCancel?()
+            AppActionFooter {
+                Button(action: onCancel) {
+                    AppButtonLabel("Cancel", width: 100)
                 }
-                .keyboardShortcut(.cancelAction)
+                    .buttonStyle(AppSecondaryButtonStyle())
+                    .keyboardShortcut(.cancelAction)
+                    .controlSize(.regular)
 
-                Spacer()
-
-                Button(viewModel.processGroups.isEmpty ? "Eject" : "Terminate & Eject") {
-                    Task {
-                        await viewModel.terminateAndEject()
-                    }
+                Button(action: onConfirm) {
+                    AppButtonLabel(primaryActionTitle, width: 160)
                 }
-                .keyboardShortcut(.defaultAction)
+                    .buttonStyle(AppPrimaryButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+                    .controlSize(.regular)
+                    .help(primaryActionHelp)
             }
-            .padding(12)
         }
     }
-}
 
-private struct ProcessGroupSection: View {
-    let group: ProcessGroup
-    let onToggle: () -> Void
+    private var noBlockersContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            StatusBanner(
+                style: .success,
+                title: "No blocking processes",
+                message: "\(viewModel.volume.name) is ready for safe ejection."
+            )
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Toggle(isOn: Binding(
-                    get: { group.isSelected },
-                    set: { _ in onToggle() }
-                )) {
-                    Label(group.category.displayName, systemImage: group.category.iconName)
-                        .font(.subheadline.weight(.semibold))
+            Text(scopeDescription)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var blockersContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            StatusBanner(
+                style: .warning,
+                title: "\(viewModel.totalProcessCount) blocking processes",
+                message: "Choose only processes you want to terminate."
+            )
+
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(spacing: 8) {
+                    ForEach(viewModel.allProcesses) { process in
+                        ProcessRowView(
+                            process: process,
+                            isSelected: viewModel.isProcessSelected(process),
+                            onToggle: {
+                                viewModel.toggleProcessSelection(process)
+                                AccessibilityAnnouncer.announce(selectionAnnouncement)
+                            }
+                        )
+                    }
                 }
-                .toggleStyle(.checkbox)
-
-                Spacer()
-
-                Text("\(group.processes.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.secondary.opacity(0.15))
-                    )
             }
+            .frame(height: 120)
 
-            ForEach(group.processes) { process in
-                ProcessRowView(process: process)
+            Text("\(viewModel.selectedProcessCount) of \(viewModel.totalProcessCount) processes selected")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
             }
         }
-        .padding(8)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.secondary.opacity(0.05))
-        )
+
+    private var scopeDescription: String {
+        let names = affectedVolumes.map(\.name).joined(separator: ", ")
+        return "Confirming will eject physical disk \(viewModel.volume.parentWholeDisk).\nAffected volumes · \(names)"
+    }
+
+    private var primaryActionTitle: String {
+        if viewModel.totalProcessCount == 0 {
+            return "Confirm Eject"
+        }
+        if viewModel.selectedProcessCount == 0 {
+            return "Eject Without Terminating"
+        }
+        return "Terminate \(viewModel.selectedProcessCount) & Eject"
+    }
+
+    private var primaryActionHelp: String {
+        viewModel.selectedProcessCount == 0 && viewModel.totalProcessCount > 0
+            ? "Attempt ejection without terminating any process"
+            : "Eject physical disk \(viewModel.volume.parentWholeDisk)"
+    }
+
+    private var selectionAnnouncement: String {
+        "\(viewModel.selectedProcessCount) of \(viewModel.totalProcessCount) processes selected"
     }
 }
 

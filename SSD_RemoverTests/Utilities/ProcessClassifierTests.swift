@@ -74,11 +74,11 @@ struct ProcessClassifierTests {
         #expect(result[0].category == .user)
     }
 
-    @Test("분류 결과의 기본 isSelected는 true")
+    @Test("분류 결과의 기본 isSelected는 false")
     func defaultIsSelected() {
         let process = BlockingProcess(pid: 1, command: "mds", user: "root", uid: 0, lockedFiles: [])
         let result = ProcessClassifier.classify([process])
-        #expect(result[0].isSelected == true)
+        #expect(result[0].isSelected == false)
     }
 
     @Test("대문자 MDS는 system 그룹 (spotlightCommands는 소문자 전용, 의도적 설계)")

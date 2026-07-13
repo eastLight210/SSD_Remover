@@ -36,6 +36,7 @@ struct EjectFlowIntegrationTests {
         )
 
         #expect(vm.phase == .confirming)
+        vm.toggleGroupSelection(category: .user)
 
         await vm.terminateAndEject(gracePeriod: 0)
 
@@ -63,6 +64,8 @@ struct EjectFlowIntegrationTests {
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
+
+        vm.toggleGroupSelection(category: .user)
 
         await vm.terminateAndEject(gracePeriod: 0)
 

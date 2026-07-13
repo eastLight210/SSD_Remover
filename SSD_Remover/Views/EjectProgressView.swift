@@ -4,101 +4,107 @@ struct EjectProgressView: View {
     let phase: EjectPhase
     let volumeName: String
     let failedTerminations: [Int32: String]
-    var onDismiss: (() -> Void)?
-    var onRetry: (() -> Void)?
+    let onDismiss: () -> Void
+    let onRetry: () -> Void
 
     var body: some View {
-        VStack(spacing: 16) {
-            icon
-            statusText
-
-            // 종료 실패 프로세스 표시
-            if !failedTerminations.isEmpty {
-                Text("Failed to terminate \(failedTerminations.count) process(es)")
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 12) {
+                statusContent
             }
+            .padding(16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(Color.appCanvas)
 
-            if isCompleted {
-                HStack(spacing: 12) {
-                    if case .failure = phase {
-                        Button("Retry") {
-                            onRetry?()
-                        }
-                    }
-                    Button("Done") {
-                        onDismiss?()
-                    }
-                    .keyboardShortcut(.defaultAction)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
-    }
-
-    @ViewBuilder
-    private var icon: some View {
-        switch phase {
-        case .terminatingProcesses:
-            ProgressView()
-                .controlSize(.large)
-        case .ejecting:
-            ProgressView()
-                .controlSize(.large)
-        case .success:
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(.green)
-        case .failure:
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(.red)
-        case .confirming:
-            EmptyView()
+            footer
         }
     }
 
     @ViewBuilder
-    private var statusText: some View {
+    private var statusContent: some View {
         switch phase {
         case .terminatingProcesses(let completed, let total):
-            VStack(spacing: 4) {
-                Text("Terminating processes...")
-                    .font(.headline)
-                Text("\(completed) / \(total)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            StatusBanner(
+                style: .info,
+                title: "Terminating processes",
+                message: "Completed \(completed) of \(total)."
+            )
+            ProgressView(value: Double(completed), total: Double(max(total, 1)))
+                .accessibilityLabel("Process termination progress")
+
         case .ejecting:
-            Text("Ejecting \(volumeName)...")
-                .font(.headline)
+            StatusBanner(
+                style: .info,
+                title: "Ejecting \(volumeName)",
+                message: "The physical disk is being unmounted safely."
+            )
+            ProgressView()
+                .controlSize(.small)
+
         case .success:
-            VStack(spacing: 4) {
-                Text("Ejected Successfully")
-                    .font(.headline)
-                Text("\(volumeName) can be safely removed.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            StatusBanner(
+                style: .success,
+                title: "Ejected successfully",
+                message: "\(volumeName) can be safely removed."
+            )
+
         case .failure(let message):
-            VStack(spacing: 4) {
-                Text("Eject Failed")
-                    .font(.headline)
-                Text(message)
+            StatusBanner(
+                style: .danger,
+                title: "Eject failed",
+                message: message
+            )
+
+            if !failedTerminations.isEmpty {
+                Text("Failed to terminate \(failedTerminations.count) process(es).")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
             }
+
         case .confirming:
             EmptyView()
         }
     }
 
-    private var isCompleted: Bool {
+    @ViewBuilder
+    private var footer: some View {
         switch phase {
-        case .success, .failure: true
-        default: false
+        case .terminatingProcesses, .ejecting:
+            AppActionFooter {
+                Text("Please wait…")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+        case .success:
+            AppActionFooter {
+                Button(action: onDismiss) {
+                    AppButtonLabel("Done", width: 160)
+                }
+                    .buttonStyle(AppPrimaryButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+                    .controlSize(.regular)
+            }
+
+        case .failure:
+            AppActionFooter {
+                Button(action: onDismiss) {
+                    AppButtonLabel("Cancel", width: 100)
+                }
+                    .buttonStyle(AppSecondaryButtonStyle())
+                    .keyboardShortcut(.cancelAction)
+                    .controlSize(.regular)
+
+                Button(action: onRetry) {
+                    AppButtonLabel("Retry", width: 160)
+                }
+                    .buttonStyle(AppPrimaryButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+                    .controlSize(.regular)
+            }
+
+        case .confirming:
+            EmptyView()
         }
     }
 }

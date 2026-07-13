@@ -6,41 +6,45 @@ struct VolumeRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "externaldrive.fill")
-                .font(.title2)
-                .foregroundStyle(isSelected ? .white : .accentColor)
+            Text("SSD")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.tint)
+                .frame(width: 32, height: 32)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(volume.name)
-                    .font(.headline)
-                    .foregroundStyle(isSelected ? .white : .primary)
-                HStack(spacing: 8) {
-                    Text(volume.fileSystem)
-                        .font(.caption)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(isSelected ? Color.white.opacity(0.2) : Color.secondary.opacity(0.15))
-                        )
-                    Text(volume.formattedCapacity)
-                        .font(.caption)
-                }
-                .foregroundStyle(isSelected ? .white.opacity(0.8) : .secondary)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                Text("\(volume.fileSystem) · \(volume.formattedTotalCapacity) · \(volume.parentWholeDisk)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
                 .font(.caption)
-                .foregroundStyle(isSelected ? .white.opacity(0.6) : .secondary)
+                .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .frame(height: 56)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isSelected ? Color.accentColor : Color.clear)
+            isSelected ? Color.accentColor.opacity(0.08) : Color(nsColor: .textBackgroundColor),
+            in: RoundedRectangle(cornerRadius: 8)
         )
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isSelected ? Color.accentColor : Color(nsColor: .separatorColor), lineWidth: 1)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(volume.name), \(volume.fileSystem), \(volume.formattedTotalCapacity), physical disk \(volume.parentWholeDisk)")
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 }
 

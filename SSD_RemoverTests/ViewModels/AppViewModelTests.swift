@@ -162,6 +162,8 @@ struct AppViewModelTests {
 
         #expect(vm.processGroups.count == 1)
         #expect(vm.processGroups[0].category == .user)
+        #expect(vm.processGroups[0].isSelected == false)
+        #expect(vm.scanState == .blocked(volume, processCount: 1))
         #expect(vm.isScanning == false)
     }
 
@@ -178,6 +180,11 @@ struct AppViewModelTests {
         await vm.scanProcesses(for: volume)
 
         #expect(vm.processGroups.isEmpty)
+        if case .failed(let failedVolume, _) = vm.scanState {
+            #expect(failedVolume == volume)
+        } else {
+            Issue.record("scanState should be failed")
+        }
         #expect(vm.isScanning == false)
     }
 

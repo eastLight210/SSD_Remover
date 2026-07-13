@@ -6,6 +6,7 @@ actor VolumeMonitorService: VolumeMonitoring {
     private let shellExecutor: ShellExecuting
     private var _volumes: [ExternalVolume] = []
     private var notificationObservers: [NSObjectProtocol] = []
+    private var updateContinuations: [UUID: AsyncStream<[ExternalVolume]>.Continuation] = [:]
 
     var volumes: [ExternalVolume] {
         _volumes
@@ -48,6 +49,17 @@ actor VolumeMonitorService: VolumeMonitoring {
         notificationObservers.removeAll()
     }
 
+    func volumeUpdates() -> AsyncStream<[ExternalVolume]> {
+        let id = UUID()
+        return AsyncStream { continuation in
+            updateContinuations[id] = continuation
+            continuation.yield(_volumes)
+            continuation.onTermination = { [weak self] _ in
+                Task { await self?.removeContinuation(id: id) }
+            }
+        }
+    }
+
     func refreshVolumes() async {
         let urls = volumeURLProvider.mountedVolumeURLs(
             includingResourceValuesForKeys: Array(Constants.volumeResourceKeys),
@@ -80,5 +92,12 @@ actor VolumeMonitorService: VolumeMonitoring {
         }
 
         _volumes = detected
+        for continuation in updateContinuations.values {
+            continuation.yield(detected)
+        }
+    }
+
+    private func removeContinuation(id: UUID) {
+        updateContinuations[id] = nil
     }
 }
