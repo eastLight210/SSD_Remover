@@ -15,4 +15,5 @@ protocol VolumeMonitoring: Sendable {
     func startMonitoring() async
     func stopMonitoring() async
     func refreshVolumes() async
+    func volumeUpdates() async -> AsyncStream<[ExternalVolume]>
 }

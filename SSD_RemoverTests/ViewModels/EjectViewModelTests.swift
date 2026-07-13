@@ -109,6 +109,13 @@ struct EjectViewModelTests {
         return groups
     }
 
+    @MainActor
+    private func selectAllProcesses(in viewModel: EjectViewModel) {
+        for process in viewModel.allProcesses where !viewModel.isProcessSelected(process) {
+            viewModel.toggleProcessSelection(process)
+        }
+    }
+
     // MARK: - 초기 상태
 
     @Test("초기 상태는 confirming 페이즈")
@@ -127,9 +134,9 @@ struct EjectViewModelTests {
 
     // MARK: - 그룹 선택
 
-    @Test("모든 그룹이 기본 선택됨")
+    @Test("모든 프로세스가 기본 선택 해제됨")
     @MainActor
-    func allGroupsSelectedByDefault() {
+    func allProcessesDeselectedByDefault() {
         let vm = EjectViewModel(
             volume: makeSampleVolume(),
             processGroups: makeGroups(includeSpotlight: true, includeUser: true),
@@ -138,7 +145,8 @@ struct EjectViewModelTests {
             diskEjector: MockDiskEjector()
         )
 
-        #expect(vm.processGroups.allSatisfy { $0.isSelected })
+        #expect(vm.processGroups.allSatisfy { !$0.isSelected })
+        #expect(vm.selectedProcesses.isEmpty)
     }
 
     @Test("그룹 선택 토글")
@@ -153,10 +161,10 @@ struct EjectViewModelTests {
         )
 
         vm.toggleGroupSelection(category: .user)
-        #expect(vm.processGroups.first(where: { $0.category == .user })?.isSelected == false)
+        #expect(vm.processGroups.first(where: { $0.category == .user })?.isSelected == true)
 
         vm.toggleGroupSelection(category: .user)
-        #expect(vm.processGroups.first(where: { $0.category == .user })?.isSelected == true)
+        #expect(vm.processGroups.first(where: { $0.category == .user })?.isSelected == false)
     }
 
     @Test("존재하지 않는 카테고리 토글은 무시")
@@ -176,7 +184,7 @@ struct EjectViewModelTests {
 
     // MARK: - selectedProcesses
 
-    @Test("선택된 그룹의 프로세스만 반환")
+    @Test("개별 선택된 프로세스만 반환")
     @MainActor
     func selectedProcessesReturnsOnlySelected() {
         let vm = EjectViewModel(
@@ -187,10 +195,14 @@ struct EjectViewModelTests {
             diskEjector: MockDiskEjector()
         )
 
-        #expect(vm.selectedProcesses.count == 3)
+        #expect(vm.selectedProcesses.isEmpty)
 
-        vm.toggleGroupSelection(category: .spotlight)
-        #expect(vm.selectedProcesses.count == 2)
+        let process = vm.allProcesses.first { $0.pid == 100 }!
+        vm.toggleProcessSelection(process)
+        #expect(vm.selectedProcesses.map(\.pid) == [100])
+
+        vm.toggleProcessSelection(process)
+        #expect(vm.selectedProcesses.isEmpty)
     }
 
     // MARK: - hasSpotlightProcesses
@@ -240,6 +252,8 @@ struct EjectViewModelTests {
             diskEjector: mockEjector
         )
 
+        selectAllProcesses(in: vm)
+
         await vm.terminateAndEject(gracePeriod: 0)
 
         #expect(vm.phase == .success)
@@ -261,6 +275,8 @@ struct EjectViewModelTests {
             processTerminator: delayedTerminator,
             diskEjector: mockEjector
         )
+
+        selectAllProcesses(in: vm)
 
         let task = Task {
             await vm.terminateAndEject(gracePeriod: 0)
@@ -332,7 +348,7 @@ struct EjectViewModelTests {
             diskEjector: mockEjector
         )
 
-        vm.toggleGroupSelection(category: .spotlight)
+        vm.toggleGroupSelection(category: .user)
 
         await vm.terminateAndEject(gracePeriod: 0)
 
@@ -358,6 +374,8 @@ struct EjectViewModelTests {
             diskEjector: mockEjector
         )
 
+        selectAllProcesses(in: vm)
+
         await vm.terminateAndEject(gracePeriod: 0)
 
         #expect(vm.failedTerminations.count == 1)
@@ -379,8 +397,6 @@ struct EjectViewModelTests {
             processTerminator: mockTerminator,
             diskEjector: mockEjector
         )
-
-        vm.toggleGroupSelection(category: .user)
 
         await vm.terminateAndEject(gracePeriod: 0)
 

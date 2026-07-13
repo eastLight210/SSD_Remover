@@ -26,4 +26,11 @@ actor MockVolumeMonitor: VolumeMonitoring {
     func refreshVolumes() async {
         refreshCallCount += 1
     }
+
+    func volumeUpdates() async -> AsyncStream<[ExternalVolume]> {
+        AsyncStream { continuation in
+            continuation.yield(stubbedVolumes)
+            continuation.finish()
+        }
+    }
 }

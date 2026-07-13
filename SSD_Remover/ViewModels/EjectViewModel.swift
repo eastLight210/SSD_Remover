@@ -13,6 +13,7 @@ enum EjectPhase: Equatable, Sendable {
 final class EjectViewModel {
     private(set) var phase: EjectPhase = .confirming
     private(set) var processGroups: [ProcessGroup] = []
+    private(set) var selectedProcessIDs: Set<Int32> = []
     private(set) var failedTerminations: [Int32: String] = [:]
 
     private(set) var isRescanning = false
@@ -30,7 +31,9 @@ final class EjectViewModel {
         diskEjector: DiskEjecting
     ) {
         self.volume = volume
-        self.processGroups = processGroups
+        self.processGroups = processGroups.map { group in
+            ProcessGroup(category: group.category, processes: group.processes, isSelected: false)
+        }
         self.processScanner = processScanner
         self.terminateAndEjectService = TerminateAndEjectService(
             processTerminator: processTerminator,
@@ -40,8 +43,20 @@ final class EjectViewModel {
 
     var selectedProcesses: [BlockingProcess] {
         processGroups
-            .filter { $0.isSelected }
             .flatMap { $0.processes }
+            .filter { selectedProcessIDs.contains($0.pid) }
+    }
+
+    var allProcesses: [BlockingProcess] {
+        processGroups.flatMap { $0.processes }
+    }
+
+    var selectedProcessCount: Int {
+        selectedProcessIDs.count
+    }
+
+    var totalProcessCount: Int {
+        allProcesses.count
     }
 
     var hasSpotlightProcesses: Bool {
@@ -50,7 +65,28 @@ final class EjectViewModel {
 
     func toggleGroupSelection(category: ProcessCategory) {
         guard let index = processGroups.firstIndex(where: { $0.category == category }) else { return }
-        processGroups[index].isSelected.toggle()
+        let processIDs = Set(processGroups[index].processes.map(\.pid))
+        let shouldSelect = !processIDs.isSubset(of: selectedProcessIDs)
+
+        if shouldSelect {
+            selectedProcessIDs.formUnion(processIDs)
+        } else {
+            selectedProcessIDs.subtract(processIDs)
+        }
+        processGroups[index].isSelected = shouldSelect
+    }
+
+    func isProcessSelected(_ process: BlockingProcess) -> Bool {
+        selectedProcessIDs.contains(process.pid)
+    }
+
+    func toggleProcessSelection(_ process: BlockingProcess) {
+        if selectedProcessIDs.contains(process.pid) {
+            selectedProcessIDs.remove(process.pid)
+        } else {
+            selectedProcessIDs.insert(process.pid)
+        }
+        synchronizeGroupSelection(for: process.pid)
     }
 
     func terminateAndEject(gracePeriod: TimeInterval = 3.0) async {
@@ -97,10 +133,24 @@ final class EjectViewModel {
         isRescanning = true
         rescanError = nil
         do {
-            processGroups = try await processScanner.scanProcesses(for: volume)
+            let groups = try await processScanner.scanProcesses(for: volume)
+            processGroups = groups.map { group in
+                ProcessGroup(category: group.category, processes: group.processes, isSelected: false)
+            }
+            selectedProcessIDs.removeAll()
         } catch {
             rescanError = error.localizedDescription
         }
         isRescanning = false
+    }
+
+    private func synchronizeGroupSelection(for pid: Int32) {
+        guard let index = processGroups.firstIndex(where: { group in
+            group.processes.contains { $0.pid == pid }
+        }) else { return }
+
+        let groupProcessIDs = Set(processGroups[index].processes.map(\.pid))
+        processGroups[index].isSelected = !groupProcessIDs.isEmpty
+            && groupProcessIDs.isSubset(of: selectedProcessIDs)
     }
 }

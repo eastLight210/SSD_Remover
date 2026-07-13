@@ -10,10 +10,10 @@ struct ProcessGroupTests {
         #expect(group.id == .spotlight)
     }
 
-    @Test("기본 isSelected는 true")
+    @Test("기본 isSelected는 false")
     func defaultIsSelected() {
         let group = ProcessGroup(category: .user, processes: [])
-        #expect(group.isSelected == true)
+        #expect(group.isSelected == false)
     }
 
     @Test("isSelected를 false로 생성할 수 있다")

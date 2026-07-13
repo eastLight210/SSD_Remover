@@ -2,43 +2,45 @@ import SwiftUI
 
 struct ProcessRowView: View {
     let process: BlockingProcess
+    let isSelected: Bool
+    let onToggle: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: process.isRoot ? "lock.shield" : "terminal")
-                .font(.caption)
-                .foregroundStyle(process.isRoot ? .orange : .secondary)
-                .frame(width: 16)
+            Toggle(
+                "Select \(process.command)",
+                isOn: Binding(
+                    get: { isSelected },
+                    set: { _ in onToggle() }
+                )
+            )
+            .labelsHidden()
+            .toggleStyle(.checkbox)
+            .controlSize(.small)
 
             VStack(alignment: .leading, spacing: 1) {
-                HStack(spacing: 4) {
-                    Text(process.command)
-                        .font(.system(.caption, design: .monospaced))
-                        .fontWeight(.medium)
+                Text(process.command)
+                    .font(.caption.weight(.medium))
+                    .lineLimit(1)
 
-                    Text("PID \(process.pid)")
-                        .font(.system(.caption2, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                }
-
-                Text(process.user)
+                Text(process.lockedFiles.first ?? "No locked path reported")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
             }
 
             Spacer()
 
-            if !process.lockedFiles.isEmpty {
-                HStack(spacing: 2) {
-                    Image(systemName: "lock.fill")
-                        .font(.caption2)
-                    Text("\(process.lockedFiles.count)")
-                        .font(.caption2)
-                }
-                .foregroundStyle(.orange)
-            }
+            Text("PID \(process.pid)")
+                .font(.system(.caption2, design: .monospaced))
+                .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .frame(height: 52)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(process.command), PID \(process.pid), locked file \(process.lockedFiles.first ?? "not reported")")
+        .accessibilityValue(isSelected ? "Selected for termination" : "Not selected")
     }
 }

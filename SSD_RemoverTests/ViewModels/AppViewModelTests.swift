@@ -139,6 +139,70 @@ struct AppViewModelTests {
         #expect(vm.isLoading == false)
     }
 
+    @Test("선택한 볼륨이 목록에서 사라지면 선택과 스캔 상태 초기화")
+    @MainActor
+    func removedSelectedVolumeClearsReviewState() async {
+        let monitor = MockVolumeMonitor()
+        let selectedVolume = makeSampleVolume(name: "Selected", deviceId: "disk4s1")
+        let remainingVolume = makeSampleVolume(name: "Remaining", deviceId: "disk5s1")
+        await monitor.setVolumes([selectedVolume, remainingVolume])
+
+        let scanner = MockProcessScanner()
+        scanner.stubbedResult = [
+            ProcessGroup(
+                category: .user,
+                processes: [
+                    BlockingProcess(
+                        pid: 100,
+                        command: "Finder",
+                        user: "testuser",
+                        uid: 501,
+                        lockedFiles: [selectedVolume.mountPoint.appendingPathComponent("file.txt").path]
+                    )
+                ]
+            )
+        ]
+
+        let vm = AppViewModel(volumeMonitorService: monitor, processScanner: scanner)
+        await vm.refreshVolumes()
+        await vm.scanProcesses(for: selectedVolume)
+        #expect(vm.scanState == .blocked(selectedVolume, processCount: 1))
+
+        await monitor.setVolumes([remainingVolume])
+        await vm.refreshVolumes()
+
+        #expect(vm.volumes == [remainingVolume])
+        #expect(vm.selectedVolume == nil)
+        #expect(vm.processGroups.isEmpty)
+        #expect(vm.scanState == .idle)
+    }
+
+    @Test("선택한 볼륨이 유지되면 최신 메타데이터로 교체")
+    @MainActor
+    func retainedSelectedVolumeUsesRefreshedMetadata() async {
+        let monitor = MockVolumeMonitor()
+        let originalVolume = makeSampleVolume()
+        let refreshedVolume = ExternalVolume(
+            id: originalVolume.id,
+            name: originalVolume.name,
+            deviceIdentifier: originalVolume.deviceIdentifier,
+            fileSystem: originalVolume.fileSystem,
+            totalCapacity: originalVolume.totalCapacity,
+            availableCapacity: 250_000_000_000,
+            mountPoint: originalVolume.mountPoint
+        )
+        await monitor.setVolumes([originalVolume])
+
+        let vm = AppViewModel(volumeMonitorService: monitor)
+        await vm.refreshVolumes()
+        vm.selectVolume(originalVolume)
+
+        await monitor.setVolumes([refreshedVolume])
+        await vm.refreshVolumes()
+
+        #expect(vm.selectedVolume == refreshedVolume)
+    }
+
     // MARK: - Process Scanning Tests
 
     @Test("scanProcesses로 프로세스 그룹 업데이트")
@@ -162,6 +226,8 @@ struct AppViewModelTests {
 
         #expect(vm.processGroups.count == 1)
         #expect(vm.processGroups[0].category == .user)
+        #expect(vm.processGroups[0].isSelected == false)
+        #expect(vm.scanState == .blocked(volume, processCount: 1))
         #expect(vm.isScanning == false)
     }
 
@@ -178,6 +244,11 @@ struct AppViewModelTests {
         await vm.scanProcesses(for: volume)
 
         #expect(vm.processGroups.isEmpty)
+        if case .failed(let failedVolume, _) = vm.scanState {
+            #expect(failedVolume == volume)
+        } else {
+            Issue.record("scanState should be failed")
+        }
         #expect(vm.isScanning == false)
     }
 
