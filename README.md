@@ -133,6 +133,10 @@ is required before any blocker is signaled. `--dry-run` safely prints the resolv
 targets without sending signals or ejecting. The default grace period is 3 seconds and can be
 changed with `--grace-period <seconds>`.
 
+CLI mode never opens a graphical administrator prompt. If the selected targets include a
+root-owned process, re-run the command explicitly with `sudo`; otherwise that target fails
+immediately with an actionable error. GUI mode may still request administrator authorization.
+
 All operational commands (`list`, `scan`, `terminate`, `eject`, and `terminate-and-eject`)
 support `--json`. The JSON contract has this top-level shape:
 
