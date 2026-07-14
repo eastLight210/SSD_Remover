@@ -242,8 +242,7 @@ struct CLICommandParser {
           SSD_Remover \(exampleAction) disk4s1 --dry-run --json
           SSD_Remover \(exampleAction) disk4s1 --all
 
-        Safety: this command sends signals to processes. Headless CLI mode never opens a GUI
-        administrator dialog; run the command with sudo when selecting root-owned targets.
+        Safety: this command sends signals to processes.
         \(ejects ? "Disk ejection follows the termination attempt." : "No disk is ejected.")
         Exit codes: 0 success, 1 runtime/operation failure, 64 command-line usage error.
         """

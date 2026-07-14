@@ -292,7 +292,6 @@ struct CLIRunnerTests {
         #expect(terminate.stdout.contains("filters form an intersection"))
         #expect(terminate.stdout.contains("--all is required"))
         #expect(terminate.stdout.contains("--dry-run"))
-        #expect(terminate.stdout.contains("sudo"))
         #expect(terminate.stdout.contains("Exit codes"))
     }
 
