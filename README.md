@@ -32,6 +32,23 @@ It automatically detects processes blocking a disk, lets you selectively termina
 3. Move `SSD_Remover.app` to the Applications folder
 4. On first launch, if you see an "unidentified developer" warning, right-click > Open to run
 
+### Install the CLI command (optional)
+
+The release app contains the CLI executable. Create a stable `ssd-remover` command on `PATH`:
+
+```bash
+sudo mkdir -p /usr/local/bin
+sudo ln -sfn "/Applications/SSD_Remover.app/Contents/MacOS/SSD_Remover" /usr/local/bin/ssd-remover
+ssd-remover --help
+```
+
+If the app is installed somewhere else, replace `/Applications/SSD_Remover.app` with its path.
+To remove only the command (the app remains installed):
+
+```bash
+sudo rm /usr/local/bin/ssd-remover
+```
+
 ## Requirements
 
 - macOS 14.0 (Sonoma) or later
@@ -80,22 +97,75 @@ Uses the **MVVM + Service Layer** pattern.
 
 ```bash
 # List external volumes
-SSD_Remover --list-volumes
+ssd-remover list
 
-# Scan blocking processes for a volume
-SSD_Remover --scan <volume-path>
+# Scan blockers and the files they hold
+ssd-remover scan <volume-query>
 
-# Terminate processes and eject
-SSD_Remover --terminate-and-eject <volume-path>
+# Terminate selected processes (repeat --group and --pid as needed)
+ssd-remover terminate <volume-query> --group user
+ssd-remover terminate <volume-query> --pid 123 --pid 456
 
-# Help
-SSD_Remover --help
+# Preview all targets without changing anything
+ssd-remover terminate-and-eject <volume-query> --dry-run
+
+# Explicitly terminate every blocker, then eject
+ssd-remover terminate-and-eject <volume-query> --all
+
+# Eject without terminating processes
+ssd-remover eject <volume-query>
+
+# Stable machine-readable output
+ssd-remover scan <volume-query> --json
+
+# Version and help
+ssd-remover version
+ssd-remover help
+ssd-remover terminate --help
 ```
+
+`<volume-query>` accepts a device identifier, exact mount path, volume name, or a unique
+case-insensitive partial match. Ambiguous matches are rejected with candidate details.
+
+For `terminate` and `terminate-and-eject`, repeated groups are combined, repeated PIDs are
+combined, and group plus PID filters form an intersection. If no filter is provided, `--all`
+is required before any blocker is signaled. `--dry-run` safely prints the resolved volume and
+targets without sending signals or ejecting. The default grace period is 3 seconds and can be
+changed with `--grace-period <seconds>`.
+
+CLI mode never opens a graphical administrator prompt. If the selected targets include a
+root-owned process, re-run the command explicitly with `sudo`; otherwise that target fails
+immediately with an actionable error. GUI mode may still request administrator authorization.
+
+All operational commands (`list`, `scan`, `terminate`, `eject`, and `terminate-and-eject`)
+support `--json`. The JSON contract has this top-level shape:
+
+```json
+{
+  "schemaVersion": 1,
+  "success": true,
+  "command": "scan",
+  "data": {}
+}
+```
+
+Successful command results are written to stdout. Usage and preflight errors in JSON mode are
+written as a structured object to stderr. A completed operation with per-process or eject
+failures remains structured on stdout and exits nonzero. `scan` JSON includes resolved volume
+metadata, process category, PID, user, UID, command, root ownership, and deduplicated locked
+file paths.
+
+Exit codes are `0` for success, `1` for runtime/operation failure, and `64` for command-line
+usage errors.
 
 ## Testing
 
 ```bash
 xcodebuild test -scheme SSD_Remover -destination 'platform=macOS'
+
+# Verify a built release app can be invoked through the installed command path
+script/test_cli_installation.sh \
+  /path/to/SSD_Remover.app/Contents/MacOS/SSD_Remover
 ```
 
 ## License

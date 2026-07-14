@@ -24,12 +24,40 @@ struct LiveCLICommandExecutor: CLICommandExecuting {
             )
             return await runner.run(command)
         } catch let error as CLIParseError {
+            if arguments.contains("--json") {
+                return .failure(
+                    CLIJSONOutput.error(
+                        command: Self.commandName(in: arguments),
+                        code: "usage_error",
+                        message: error.localizedDescription,
+                        usage: CLICommandParser.usageText
+                    ),
+                    exitCode: 64
+                )
+            }
             return .failure(
                 "\(error.localizedDescription)\n\n\(CLICommandParser.usageText)",
                 exitCode: 64
             )
         } catch {
             return .failure(error.localizedDescription)
+        }
+    }
+
+    private static func commandName(in arguments: [String]) -> String {
+        guard let command = arguments.first else {
+            return "help"
+        }
+
+        switch command {
+        case "ls":
+            return "list"
+        case "--version", "-v":
+            return "version"
+        case "--help", "-h":
+            return "help"
+        default:
+            return command
         }
     }
 }
