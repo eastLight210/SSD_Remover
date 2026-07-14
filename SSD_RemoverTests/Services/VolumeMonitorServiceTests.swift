@@ -1,3 +1,4 @@
+import AppKit
 import Testing
 import Foundation
 @testable import SSD_Remover
@@ -38,6 +39,26 @@ struct VolumeMonitorServiceTests {
         </dict>
         </plist>
         """
+    }
+
+    private func nextRefreshedVolumes(
+        from stream: AsyncStream<[ExternalVolume]>
+    ) async -> [ExternalVolume]? {
+        await withTaskGroup(of: [ExternalVolume]?.self) { group in
+            group.addTask {
+                var iterator = stream.makeAsyncIterator()
+                _ = await iterator.next()
+                return await iterator.next()
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(1))
+                return nil
+            }
+
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result
+        }
     }
 
     // MARK: - Tests
@@ -143,6 +164,73 @@ struct VolumeMonitorServiceTests {
         #expect(mockShell.executedCommands.count == 1)
         #expect(volumes.count == 1)
         #expect(volumes[0].name == "External")
+    }
+
+    // MARK: - Workspace Notifications
+
+    @Test("마운트 알림 시 볼륨 목록 새로고침")
+    @MainActor
+    func didMountNotificationRefreshesVolumes() async {
+        let mockProvider = MockVolumeURLProvider()
+        mockProvider.stubbedURLs = []
+
+        let mockShell = MockShellExecutor()
+        let notificationCenter = NotificationCenter()
+        let service = VolumeMonitorService(
+            volumeURLProvider: mockProvider,
+            shellExecutor: mockShell,
+            notificationCenter: notificationCenter
+        )
+
+        await service.refreshVolumes()
+        let updates = await service.volumeUpdates()
+
+        mockProvider.stubbedURLs = [
+            URL(fileURLWithPath: "/Volumes/MountedDrive")
+        ]
+        mockShell.stubbedResult = makeSamplePlist(
+            name: "MountedDrive",
+            mountPoint: "/Volumes/MountedDrive"
+        )
+
+        await service.startMonitoring()
+        notificationCenter.post(name: NSWorkspace.didMountNotification, object: nil)
+        let refreshedVolumes = await nextRefreshedVolumes(from: updates)
+        await service.stopMonitoring()
+
+        #expect(refreshedVolumes?.map(\.name) == ["MountedDrive"])
+    }
+
+    @Test("마운트 해제 알림 시 볼륨 목록 새로고침")
+    @MainActor
+    func didUnmountNotificationRefreshesVolumes() async {
+        let mockProvider = MockVolumeURLProvider()
+        mockProvider.stubbedURLs = [
+            URL(fileURLWithPath: "/Volumes/UnmountedDrive")
+        ]
+
+        let mockShell = MockShellExecutor()
+        mockShell.stubbedResult = makeSamplePlist(
+            name: "UnmountedDrive",
+            mountPoint: "/Volumes/UnmountedDrive"
+        )
+        let notificationCenter = NotificationCenter()
+        let service = VolumeMonitorService(
+            volumeURLProvider: mockProvider,
+            shellExecutor: mockShell,
+            notificationCenter: notificationCenter
+        )
+
+        await service.refreshVolumes()
+        let updates = await service.volumeUpdates()
+        mockProvider.stubbedURLs = []
+
+        await service.startMonitoring()
+        notificationCenter.post(name: NSWorkspace.didUnmountNotification, object: nil)
+        let refreshedVolumes = await nextRefreshedVolumes(from: updates)
+        await service.stopMonitoring()
+
+        #expect(refreshedVolumes?.isEmpty == true)
     }
 
     // MARK: - Edge Cases

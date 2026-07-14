@@ -15,6 +15,23 @@ struct ShellExecutorTests {
         #expect(result.trimmingCharacters(in: .whitespacesAndNewlines) == "hello")
     }
 
+    @Test("64KB를 넘는 stdout과 stderr를 교착 없이 처리")
+    func executeLargeOutput() async throws {
+        let executor = ShellExecutor()
+        let outputByteCount = 256 * 1024
+        let script = """
+        /usr/bin/yes stdout | /usr/bin/head -c \(outputByteCount)
+        /usr/bin/yes stderr | /usr/bin/head -c \(outputByteCount) 1>&2
+        """
+
+        let result = try await executor.execute(
+            command: "/bin/sh",
+            arguments: ["-c", script]
+        )
+
+        #expect(result.utf8.count == outputByteCount)
+    }
+
     @Test("존재하지 않는 명령어는 에러 발생")
     func executeNonExistentCommand() async {
         let executor = ShellExecutor()

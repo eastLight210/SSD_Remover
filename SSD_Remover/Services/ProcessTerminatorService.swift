@@ -106,8 +106,17 @@ actor ProcessTerminatorService: ProcessTerminating {
                 arguments: ["-0", String(process.pid)]
             )
             return true
+        } catch let error as ShellError {
+            if case .executionFailed(_, let stderr) = error,
+               stderr.contains("No such process") {
+                return false
+            }
+
+            // EPERM and verification failures do not prove that the process exited.
+            return true
         } catch {
-            return false
+            // Only an explicit "No such process" response is safe to treat as dead.
+            return true
         }
     }
 }

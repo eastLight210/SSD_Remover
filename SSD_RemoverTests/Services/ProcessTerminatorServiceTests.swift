@@ -85,13 +85,13 @@ struct ProcessTerminatorServiceTests {
 
     // MARK: - Root 프로세스
 
-    @Test("root 프로세스는 PrivilegedExecuting 사용")
-    func rootProcessUsesPrivilegedExecutor() async {
+    @Test("root 프로세스 kill -0에서 No such process → SIGKILL 없이 .terminated")
+    func rootProcessNotFoundAfterSigterm() async {
         let mockShell = MockShellExecutor()
         let mockPrivileged = MockPrivilegedExecutor()
 
         // kill -15는 privileged로 실행
-        // kill -0는 일반 shell로 실행 → 실패 (프로세스 종료됨)
+        // kill -0는 일반 shell로 실행 → No such process (프로세스 종료됨)
         mockShell.stubbedErrors = [ShellError.executionFailed(exitCode: 1, stderr: "No such process")]
 
         let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
@@ -100,9 +100,29 @@ struct ProcessTerminatorServiceTests {
         #expect(result == .terminated)
         #expect(mockPrivileged.executedCommands.count == 1)
         #expect(mockPrivileged.executedCommands[0].contains("kill -15 5678"))
-        // kill -0은 일반 shell로 확인
         #expect(mockShell.executedCommands.count == 1)
         #expect(mockShell.executedCommands[0].arguments == ["-0", "5678"])
+    }
+
+    @Test("root 프로세스 kill -0에서 EPERM → 종료로 간주하지 않고 SIGKILL")
+    func rootProcessPermissionDeniedDuringLivenessCheck() async {
+        let mockShell = MockShellExecutor()
+        let mockPrivileged = MockPrivilegedExecutor()
+
+        // kill -15는 privileged로 성공하지만 일반 shell의 kill -0는 권한 부족
+        mockShell.stubbedErrors = [
+            ShellError.executionFailed(exitCode: 1, stderr: "Operation not permitted")
+        ]
+
+        let service = ProcessTerminatorService(shell: mockShell, privilegedShell: mockPrivileged)
+        let result = await service.terminate(process: rootProcess, gracePeriod: 0)
+
+        #expect(result == .terminated)
+        #expect(mockShell.executedCommands.count == 1)
+        #expect(mockShell.executedCommands[0].arguments == ["-0", "5678"])
+        #expect(mockPrivileged.executedCommands.count == 2)
+        #expect(mockPrivileged.executedCommands[0].contains("kill -15 5678"))
+        #expect(mockPrivileged.executedCommands[1].contains("kill -9 5678"))
     }
 
     @Test("root 프로세스 SIGTERM 후 생존 → SIGKILL도 privileged")
