@@ -122,7 +122,9 @@ private final class ShellExecutionState: @unchecked Sendable {
         lock.unlock()
 
         if shouldCleanup {
-            terminateAndCleanup()
+            // A stop that raced with process.run() saw a not-yet-running process and
+            // could not signal it; now that the launch is known, retry termination.
+            terminateAndCleanup(force: true)
         }
         finish(completedExecution)
 
@@ -295,9 +297,9 @@ private final class ShellExecutionState: @unchecked Sendable {
         }
     }
 
-    private func terminateAndCleanup() {
+    private func terminateAndCleanup(force: Bool = false) {
         lock.lock()
-        guard !cleanupStarted else {
+        guard force || !cleanupStarted else {
             lock.unlock()
             return
         }

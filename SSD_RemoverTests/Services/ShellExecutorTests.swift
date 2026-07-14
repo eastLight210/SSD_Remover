@@ -137,6 +137,63 @@ struct ShellExecutorTests {
         }
     }
 
+    @Test("launch 도중 cancellation이 발생해도 child는 누수되지 않음")
+    func cancellationDuringLaunchDoesNotLeakChild() async throws {
+        let directory = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let executor = ShellExecutor(defaultTimeout: 5, terminationGracePeriod: 0.01)
+
+        for iteration in 0..<20 {
+            let pidFile = directory.appendingPathComponent("pid-\(iteration)")
+            let task = Task {
+                try await executor.execute(
+                    command: "/bin/sh",
+                    arguments: ["-c", "echo $$ > '\(pidFile.path)'; exec /bin/sleep 30"]
+                )
+            }
+            if iteration > 0 {
+                try? await Task.sleep(for: .microseconds(iteration * 250))
+            }
+            task.cancel()
+            _ = try? await task.value
+
+            guard let pid = try await launchedPid(at: pidFile) else {
+                continue
+            }
+
+            var deadline = 100
+            errno = 0
+            while Darwin.kill(pid, 0) == 0, deadline > 0 {
+                deadline -= 1
+                try? await Task.sleep(for: .milliseconds(10))
+                errno = 0
+            }
+
+            if Darwin.kill(pid, 0) == 0 {
+                Issue.record("Iteration \(iteration): child \(pid) survived cancellation")
+                _ = Darwin.kill(pid, SIGKILL)
+            } else {
+                #expect(errno == ESRCH)
+            }
+        }
+    }
+
+    private func launchedPid(at pidFile: URL) async throws -> pid_t? {
+        for _ in 0..<20 {
+            if let text = try? String(contentsOf: pidFile, encoding: .utf8) {
+                let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let pid = pid_t(trimmed) {
+                    return pid
+                }
+            }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        return nil
+    }
+
     @Test("timeout과 cancellation race에서도 각 호출은 정확히 한 번 완료")
     func timeoutCancellationRaceCompletesExactlyOnce() async {
         let executor = ShellExecutor(defaultTimeout: 0.03, terminationGracePeriod: 0.01)
