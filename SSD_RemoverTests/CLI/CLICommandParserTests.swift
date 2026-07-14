@@ -20,6 +20,54 @@ struct CLICommandParserTests {
         #expect(command == .scan(volumeQuery: "TestDrive"))
     }
 
+    @Test("모든 subcommand는 command-scoped help를 지원")
+    func parsesCommandScopedHelp() throws {
+        let expectations: [(String, CLIHelpTopic)] = [
+            ("list", .list),
+            ("scan", .scan),
+            ("terminate", .terminate),
+            ("eject", .eject),
+            ("terminate-and-eject", .terminateAndEject),
+            ("version", .version),
+        ]
+
+        for (commandName, topic) in expectations {
+            #expect(try parser.parse(arguments: [commandName, "--help"]) == .help(topic: topic))
+        }
+    }
+
+    @Test("list와 help 별칭은 후행 인자를 거부")
+    func rejectsTrailingArgumentsForListAndHelpAliases() {
+        for command in ["list", "ls", "help", "-h", "--help"] {
+            #expect(throws: CLIParseError.unexpectedArguments(
+                command: command,
+                arguments: ["typo"]
+            )) {
+                try parser.parse(arguments: [command, "typo"])
+            }
+        }
+    }
+
+    @Test("version 명령과 별칭을 파싱")
+    func parsesVersionAliases() throws {
+        #expect(try parser.parse(arguments: ["version"]) == .version)
+        #expect(try parser.parse(arguments: ["--version"]) == .version)
+        #expect(try parser.parse(arguments: ["-v"]) == .version)
+    }
+
+    @Test("JSON 옵션은 운영 명령의 앞뒤에서 파싱")
+    func parsesJSONOutputOption() throws {
+        #expect(try parser.parse(arguments: ["list", "--json"]) == .listVolumes(outputFormat: .json))
+        #expect(try parser.parse(arguments: ["scan", "--json", "TestDrive"]) == .scan(
+            volumeQuery: "TestDrive",
+            outputFormat: .json
+        ))
+        #expect(try parser.parse(arguments: ["eject", "TestDrive", "--json"]) == .eject(
+            volumeQuery: "TestDrive",
+            outputFormat: .json
+        ))
+    }
+
     @Test("scan/eject 명령은 추가 피연산자를 거부")
     func rejectsExtraVolumeQueryOperands() {
         #expect(throws: CLIParseError.unexpectedArguments(command: "scan", arguments: ["SSD"])) {
@@ -50,6 +98,59 @@ struct CLICommandParserTests {
             ),
             gracePeriod: 1.5
         ))
+    }
+
+    @Test("종료 명령은 all과 dry-run 의도를 보존")
+    func parsesTerminationSafetyOptions() throws {
+        let all = try parser.parse(arguments: [
+            "terminate", "TestDrive", "--all", "--grace-period", "0", "--json",
+        ])
+        #expect(all == .terminate(
+            volumeQuery: "TestDrive",
+            selection: .unfiltered,
+            gracePeriod: 0,
+            explicitlyIncludesAll: true,
+            outputFormat: .json
+        ))
+
+        let dryRun = try parser.parse(arguments: [
+            "terminate-and-eject", "TestDrive", "--dry-run",
+        ])
+        #expect(dryRun == .terminateAndEject(
+            volumeQuery: "TestDrive",
+            selection: .unfiltered,
+            gracePeriod: 3,
+            dryRun: true
+        ))
+    }
+
+    @Test("all은 group 또는 pid 필터와 함께 사용할 수 없음")
+    func rejectsAllWithFilters() {
+        #expect(throws: CLIParseError.conflictingOptions("--all", "--group/--pid")) {
+            try parser.parse(arguments: [
+                "terminate", "TestDrive", "--all", "--group", "user",
+            ])
+        }
+    }
+
+    @Test("단일 옵션의 중복을 거부")
+    func rejectsDuplicateSingletonOptions() {
+        #expect(throws: CLIParseError.duplicateOption("--json")) {
+            try parser.parse(arguments: ["list", "--json", "--json"])
+        }
+        #expect(throws: CLIParseError.duplicateOption("--all")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--all", "--all"])
+        }
+        #expect(throws: CLIParseError.duplicateOption("--dry-run")) {
+            try parser.parse(arguments: ["terminate", "TestDrive", "--dry-run", "--dry-run"])
+        }
+        #expect(throws: CLIParseError.duplicateOption("--grace-period")) {
+            try parser.parse(arguments: [
+                "terminate", "TestDrive",
+                "--grace-period", "1",
+                "--grace-period", "2",
+            ])
+        }
     }
 
     @Test("알 수 없는 그룹 값은 파싱 에러")

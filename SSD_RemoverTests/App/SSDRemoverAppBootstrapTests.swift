@@ -65,6 +65,32 @@ struct SSDRemoverAppBootstrapTests {
         #expect(result.stderr.contains(CLICommandParser.usageText))
     }
 
+    @Test("live executor는 list 후행 인자를 usage error로 반환")
+    func liveExecutorRejectsTrailingListArgument() async {
+        let result = await LiveCLICommandExecutor().run(arguments: ["list", "typo"])
+
+        #expect(result.exitCode == 64)
+        #expect(result.stdout.isEmpty)
+        #expect(result.stderr.contains("Unexpected extra arguments"))
+        #expect(result.stderr.contains(CLICommandParser.usageText))
+    }
+
+    @Test("JSON parse error는 구조화된 stderr만 반환")
+    func liveExecutorFormatsJSONParseFailure() async throws {
+        let result = await LiveCLICommandExecutor().run(arguments: ["list", "typo", "--json"])
+        let value = try JSONSerialization.jsonObject(with: Data(result.stderr.utf8))
+        let object = try #require(value as? [String: Any])
+        let error = try #require(object["error"] as? [String: Any])
+
+        #expect(result.exitCode == 64)
+        #expect(result.stdout.isEmpty)
+        #expect(object["schemaVersion"] as? Int == 1)
+        #expect(object["success"] as? Bool == false)
+        #expect(object["command"] as? String == "list")
+        #expect(error["code"] as? String == "usage_error")
+        #expect(error["usage"] as? String == CLICommandParser.usageText)
+    }
+
     @Test("blocking executor는 비동기 CLI 결과를 동기적으로 기다림")
     func blockingExecutorWaitsForAsyncResult() {
         let expectedResult = CLIExecutionResult(
