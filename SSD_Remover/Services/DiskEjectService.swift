@@ -20,6 +20,8 @@ actor DiskEjectService: DiskEjecting {
                 return .failed(stderr)
             case .launchFailed(let message):
                 return .failed(message)
+            case .timedOut, .cancelled:
+                return .failed(error.localizedDescription)
             }
         } catch {
             return .failed(error.localizedDescription)

@@ -226,6 +226,8 @@ actor ProcessTerminatorService: ProcessTerminating {
                 return .failure(stderr)
             case .launchFailed(let message):
                 return .failure(message)
+            case .timedOut, .cancelled:
+                return .failure(error.localizedDescription)
             }
         } catch {
             return .failure(error.localizedDescription)

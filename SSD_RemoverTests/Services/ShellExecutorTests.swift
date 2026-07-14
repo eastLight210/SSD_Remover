@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import Darwin
 @testable import SSD_Remover
 
 @Suite("ShellExecutor Tests")
@@ -68,12 +69,180 @@ struct ShellExecutorTests {
             case .executionFailed(let code, let stderr):
                 #expect(code != 0)
                 #expect(!stderr.isEmpty)
-            default:
+            case .launchFailed, .timedOut, .cancelled:
                 Issue.record("Unexpected error type: \(error)")
             }
         } catch {
             Issue.record("Unexpected error: \(error)")
         }
+    }
+
+    @Test("기본 timeout은 장기 실행 child를 종료하고 actionable error 반환")
+    func defaultTimeoutStopsLongRunningChild() async throws {
+        let directory = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let pidFile = directory.appendingPathComponent("pid")
+        let executor = ShellExecutor(defaultTimeout: 0.08, terminationGracePeriod: 0.02)
+        let start = ProcessInfo.processInfo.systemUptime
+
+        do {
+            _ = try await executor.execute(
+                command: "/bin/sh",
+                arguments: ["-c", "echo $$ > '\(pidFile.path)'; exec /bin/sleep 5"]
+            )
+            Issue.record("Expected timeout")
+        } catch let error as ShellError {
+            guard case .timedOut(let command, let seconds) = error else {
+                Issue.record("Expected timedOut, got \(error)")
+                return
+            }
+            #expect(command == "sh")
+            #expect(seconds == 0.08)
+            #expect(error.localizedDescription.contains("did not respond"))
+            #expect(error.localizedDescription.contains("unresponsive"))
+        }
+
+        let elapsed = ProcessInfo.processInfo.systemUptime - start
+        #expect(elapsed < 0.5)
+
+        try? await Task.sleep(for: .milliseconds(150))
+        let pidText = try String(contentsOf: pidFile, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let pid = try #require(pid_t(pidText))
+        errno = 0
+        #expect(Darwin.kill(pid, 0) == -1)
+        #expect(errno == ESRCH)
+    }
+
+    @Test("Task cancellation은 child cleanup 후 cancelled를 한 번만 반환")
+    func taskCancellationStopsChild() async {
+        let executor = ShellExecutor(defaultTimeout: 5, terminationGracePeriod: 0.02)
+        let task = Task {
+            try await executor.execute(command: "/bin/sleep", arguments: ["5"])
+        }
+
+        try? await Task.sleep(for: .milliseconds(50))
+        task.cancel()
+
+        do {
+            _ = try await task.value
+            Issue.record("Expected cancellation")
+        } catch let error as ShellError {
+            #expect(error == .cancelled)
+        } catch {
+            Issue.record("Unexpected cancellation error: \(error)")
+        }
+    }
+
+    @Test("launch 도중 cancellation이 발생해도 child는 누수되지 않음")
+    func cancellationDuringLaunchDoesNotLeakChild() async throws {
+        let directory = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let executor = ShellExecutor(defaultTimeout: 5, terminationGracePeriod: 0.01)
+
+        for iteration in 0..<20 {
+            let pidFile = directory.appendingPathComponent("pid-\(iteration)")
+            let task = Task {
+                try await executor.execute(
+                    command: "/bin/sh",
+                    arguments: ["-c", "echo $$ > '\(pidFile.path)'; exec /bin/sleep 30"]
+                )
+            }
+            if iteration > 0 {
+                try? await Task.sleep(for: .microseconds(iteration * 250))
+            }
+            task.cancel()
+            _ = try? await task.value
+
+            guard let pid = try await launchedPid(at: pidFile) else {
+                continue
+            }
+
+            var deadline = 100
+            errno = 0
+            while Darwin.kill(pid, 0) == 0, deadline > 0 {
+                deadline -= 1
+                try? await Task.sleep(for: .milliseconds(10))
+                errno = 0
+            }
+
+            if Darwin.kill(pid, 0) == 0 {
+                Issue.record("Iteration \(iteration): child \(pid) survived cancellation")
+                _ = Darwin.kill(pid, SIGKILL)
+            } else {
+                #expect(errno == ESRCH)
+            }
+        }
+    }
+
+    private func launchedPid(at pidFile: URL) async throws -> pid_t? {
+        for _ in 0..<20 {
+            if let text = try? String(contentsOf: pidFile, encoding: .utf8) {
+                let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let pid = pid_t(trimmed) {
+                    return pid
+                }
+            }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        return nil
+    }
+
+    @Test("timeout과 cancellation race에서도 각 호출은 정확히 한 번 완료")
+    func timeoutCancellationRaceCompletesExactlyOnce() async {
+        let executor = ShellExecutor(defaultTimeout: 0.03, terminationGracePeriod: 0.01)
+
+        for iteration in 0..<10 {
+            let task = Task {
+                try await executor.execute(command: "/bin/sleep", arguments: ["1"])
+            }
+            let cancellationDelay = iteration.isMultiple(of: 2) ? 20 : 35
+            try? await Task.sleep(for: .milliseconds(cancellationDelay))
+            task.cancel()
+
+            do {
+                _ = try await task.value
+                Issue.record("Expected timeout or cancellation")
+            } catch let error as ShellError {
+                switch error {
+                case .timedOut, .cancelled:
+                    break
+                case .executionFailed, .launchFailed:
+                    Issue.record("Unexpected race result: \(error)")
+                }
+            } catch {
+                Issue.record("Unexpected race error: \(error)")
+            }
+        }
+    }
+
+    @Test("timeout은 출력 pipe가 열려 있어도 caller를 deadline에 완료")
+    func timeoutDoesNotWaitForOutputEOF() async {
+        let executor = ShellExecutor(defaultTimeout: 0.06, terminationGracePeriod: 0.02)
+        let start = ProcessInfo.processInfo.systemUptime
+
+        do {
+            _ = try await executor.execute(
+                command: "/bin/sh",
+                arguments: ["-c", "printf partial-output; exec /bin/sleep 5"]
+            )
+            Issue.record("Expected timeout")
+        } catch let error as ShellError {
+            guard case .timedOut = error else {
+                Issue.record("Expected timedOut, got \(error)")
+                return
+            }
+        } catch {
+            Issue.record("Unexpected timeout error: \(error)")
+        }
+
+        #expect(ProcessInfo.processInfo.systemUptime - start < 0.5)
     }
 }
 

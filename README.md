@@ -155,6 +155,12 @@ failures remains structured on stdout and exits nonzero. `scan` JSON includes re
 metadata, process category, PID, user, UID, command, root ownership, and deduplicated locked
 file paths.
 
+External commands such as `lsof`, `diskutil`, and `kill` have a 30-second default deadline so
+automation cannot wait forever on an unresponsive volume. A timeout returns a nonzero exit code
+with the command name and deadline. SSD Remover requests child termination, escalates when needed,
+and closes its output pipes. A process blocked in an uninterruptible kernel operation may remain
+visible to macOS temporarily even after cleanup has been requested.
+
 Exit codes are `0` for success, `1` for runtime/operation failure, and `64` for command-line
 usage errors.
 
