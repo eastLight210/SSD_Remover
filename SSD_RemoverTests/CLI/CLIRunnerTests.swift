@@ -508,4 +508,22 @@ struct CLIRunnerTests {
         #expect(object["success"] as? Bool == false)
         #expect(error["code"] as? String == "volume_lookup_failed")
     }
+
+    @Test("shell timeout은 CLI에서 actionable nonzero error로 노출")
+    func shellTimeoutIsActionableInCLI() async {
+        let volumeMonitor = MockVolumeMonitor()
+        await volumeMonitor.setVolumes([makeVolume()])
+        let scanner = MockProcessScanner()
+        scanner.stubbedError = ShellError.timedOut(command: "lsof", seconds: 30)
+
+        let result = await makeRunner(
+            volumeMonitor: volumeMonitor,
+            scanner: scanner
+        ).run(.scan(volumeQuery: "TestDrive"))
+
+        #expect(result.exitCode == 1)
+        #expect(result.stdout.isEmpty)
+        #expect(result.stderr.contains("lsof did not respond within 30 seconds"))
+        #expect(result.stderr.contains("unresponsive"))
+    }
 }
