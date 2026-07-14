@@ -4,6 +4,7 @@ import Foundation
 actor VolumeMonitorService: VolumeMonitoring {
     private let volumeURLProvider: VolumeURLProviding
     private let shellExecutor: ShellExecuting
+    private let notificationCenter: NotificationCenter
     private var _volumes: [ExternalVolume] = []
     private var notificationObservers: [NSObjectProtocol] = []
     private var updateContinuations: [UUID: AsyncStream<[ExternalVolume]>.Continuation] = [:]
@@ -14,14 +15,16 @@ actor VolumeMonitorService: VolumeMonitoring {
 
     init(
         volumeURLProvider: VolumeURLProviding = FileManager.default,
-        shellExecutor: ShellExecuting = ShellExecutor()
+        shellExecutor: ShellExecuting = ShellExecutor(),
+        notificationCenter: NotificationCenter = NSWorkspace.shared.notificationCenter
     ) {
         self.volumeURLProvider = volumeURLProvider
         self.shellExecutor = shellExecutor
+        self.notificationCenter = notificationCenter
     }
 
     func startMonitoring() {
-        let mountObserver = NotificationCenter.default.addObserver(
+        let mountObserver = notificationCenter.addObserver(
             forName: NSWorkspace.didMountNotification,
             object: nil,
             queue: .main
@@ -30,7 +33,7 @@ actor VolumeMonitorService: VolumeMonitoring {
             Task { await self.refreshVolumes() }
         }
 
-        let unmountObserver = NotificationCenter.default.addObserver(
+        let unmountObserver = notificationCenter.addObserver(
             forName: NSWorkspace.didUnmountNotification,
             object: nil,
             queue: .main
@@ -44,7 +47,7 @@ actor VolumeMonitorService: VolumeMonitoring {
 
     func stopMonitoring() {
         for observer in notificationObservers {
-            NotificationCenter.default.removeObserver(observer)
+            notificationCenter.removeObserver(observer)
         }
         notificationObservers.removeAll()
     }
