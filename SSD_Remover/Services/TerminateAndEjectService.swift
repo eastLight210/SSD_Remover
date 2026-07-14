@@ -27,21 +27,21 @@ struct TerminateAndEjectService: Sendable {
         onProgress: ProgressHandler? = nil,
         onBeforeEject: PhaseHandler? = nil
     ) async -> TerminateAndEjectOutcome {
-        var results: [Int32: TerminationResult] = [:]
         let total = processes.count
 
         if total > 0 {
             await onProgress?(0, total)
         }
 
-        var completed = 0
-        for process in processes {
-            results[process.pid] = await processTerminator.terminate(
-                process: process,
-                gracePeriod: gracePeriod
-            )
-            completed += 1
-            await onProgress?(completed, total)
+        let results = await processTerminator.terminateAll(
+            processes: processes,
+            gracePeriod: gracePeriod
+        )
+
+        if total > 0 {
+            for completed in 1...total {
+                await onProgress?(completed, total)
+            }
         }
 
         await onBeforeEject?()
