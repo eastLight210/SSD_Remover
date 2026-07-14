@@ -18,7 +18,8 @@ struct LiveCLICommandExecutor: CLICommandExecuting {
                 processScanner: ProcessScannerService(shell: shell),
                 processTerminator: ProcessTerminatorService(
                     shell: shell,
-                    privilegedShell: PrivilegedExecutor()
+                    privilegedShell: PrivilegedExecutor(),
+                    context: .headlessCLI(effectiveUserID: geteuid())
                 ),
                 diskEjector: DiskEjectService(shell: shell)
             )
