@@ -46,8 +46,8 @@ test("admin signups stay owner-only and provide a protected CSV export", async (
   assert.match(adminPage, /requireAdminUser\("\/admin"\)/);
   assert.match(adminPage, /Download CSV/);
   assert.match(adminPage, /export const dynamic = "force-dynamic"/);
-  assert.match(adminAuth, /SSD_REMOVER_ADMIN_USER_ID/);
-  assert.match(adminAuth, /user\.userId === adminUserId/);
+  assert.match(adminAuth, /SSD_REMOVER_ADMIN_EMAIL/);
+  assert.match(adminAuth, /user\.email\.trim\(\)\.toLowerCase\(\) === adminEmail/);
   assert.match(chatGPTAuth, /oai-authenticated-user-id/);
   assert.match(exportRoute, /getAdminUser/);
   assert.match(exportRoute, /Content-Disposition/);

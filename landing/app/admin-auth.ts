@@ -2,14 +2,14 @@ import { env } from "cloudflare:workers";
 import { redirect } from "next/navigation";
 import { getChatGPTUser, requireChatGPTUser, type ChatGPTUser } from "./chatgpt-auth";
 
-function configuredAdminUserId(): string | null {
-  const value = (env as unknown as { SSD_REMOVER_ADMIN_USER_ID?: string }).SSD_REMOVER_ADMIN_USER_ID;
-  return value?.trim() || null;
+function configuredAdminEmail(): string | null {
+  const value = (env as unknown as { SSD_REMOVER_ADMIN_EMAIL?: string }).SSD_REMOVER_ADMIN_EMAIL;
+  return value?.trim().toLowerCase() || null;
 }
 
 function isConfiguredAdmin(user: ChatGPTUser): boolean {
-  const adminUserId = configuredAdminUserId();
-  return adminUserId !== null && user.userId === adminUserId;
+  const adminEmail = configuredAdminEmail();
+  return adminEmail !== null && user.email.trim().toLowerCase() === adminEmail;
 }
 
 export async function requireAdminUser(returnTo: string): Promise<ChatGPTUser> {
