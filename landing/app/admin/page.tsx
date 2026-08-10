@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { requireAdminUser } from "../admin-auth";
-import { chatGPTSignOutPath } from "../chatgpt-auth";
 import {
   ensureBetaSignupsTable,
   getBetaSignupStats,
@@ -66,7 +65,7 @@ export default async function AdminPage({ searchParams }: { searchParams: AdminS
         </Link>
         <div className="admin-account">
           <span>{user.email}</span>
-          <a href={chatGPTSignOutPath("/")}>Sign out</a>
+          <form action="/api/admin/logout" method="post"><button type="submit">Sign out</button></form>
         </div>
       </header>
 

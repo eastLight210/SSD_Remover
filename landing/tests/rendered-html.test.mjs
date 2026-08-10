@@ -35,10 +35,13 @@ test("landing source keeps the beta funnel and proof artifact intact", async () 
   assert.match(css, /--color-bg-accent:/);
 });
 
-test("admin signups stay owner-only and provide a protected CSV export", async () => {
-  const [adminPage, adminAuth, chatGPTAuth, exportRoute] = await Promise.all([
+test("admin signups require a signed session and provide a protected CSV export", async () => {
+  const [adminPage, adminAuth, adminSession, loginPage, loginRoute, chatGPTAuth, exportRoute] = await Promise.all([
     readFile(new URL("app/admin/page.tsx", root), "utf8"),
     readFile(new URL("app/admin-auth.ts", root), "utf8"),
+    readFile(new URL("app/admin-session.ts", root), "utf8"),
+    readFile(new URL("app/admin/login/page.tsx", root), "utf8"),
+    readFile(new URL("app/api/admin/login/route.ts", root), "utf8"),
     readFile(new URL("app/chatgpt-auth.ts", root), "utf8"),
     readFile(new URL("app/api/admin/signups/export/route.ts", root), "utf8"),
   ]);
@@ -46,8 +49,12 @@ test("admin signups stay owner-only and provide a protected CSV export", async (
   assert.match(adminPage, /requireAdminUser\("\/admin"\)/);
   assert.match(adminPage, /Download CSV/);
   assert.match(adminPage, /export const dynamic = "force-dynamic"/);
-  assert.match(adminAuth, /SSD_REMOVER_ADMIN_EMAIL/);
-  assert.match(adminAuth, /user\.email\.trim\(\)\.toLowerCase\(\) === adminEmail/);
+  assert.match(adminAuth, /hasValidAdminSession/);
+  assert.match(adminSession, /SSD_REMOVER_ADMIN_PASSWORD/);
+  assert.match(adminSession, /SSD_REMOVER_ADMIN_SESSION_SECRET/);
+  assert.match(adminSession, /HttpOnly; Secure; SameSite=Strict/);
+  assert.match(loginPage, /autoComplete="current-password"/);
+  assert.match(loginRoute, /verifyAdminPassword/);
   assert.match(chatGPTAuth, /oai-authenticated-user-id/);
   assert.match(exportRoute, /getAdminUser/);
   assert.match(exportRoute, /Content-Disposition/);
