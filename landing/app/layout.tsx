@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ssd-remover.badgerworks.dev"),
+  metadataBase: new URL("https://ssdremover.badgerworks.dev"),
   title: "SSD Remover — Find the blocker. Eject safely.",
   description: "See what is blocking your external drive, close only what you choose, and eject it safely on macOS.",
   applicationName: "SSD Remover",

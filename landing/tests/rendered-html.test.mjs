@@ -21,6 +21,7 @@ test("landing source keeps the beta funnel and proof artifact intact", async () 
   assert.match(page, /Join the private beta/);
   assert.match(page, /Runs locally/);
   assert.match(layout, /SSD Remover — Find the blocker/);
+  assert.match(layout, /https:\/\/ssdremover\.badgerworks\.dev/);
   assert.match(layout, /\/og\.png/);
   assert.match(form, /autoComplete="email"/);
   assert.match(form, /aria-live="polite"/);
