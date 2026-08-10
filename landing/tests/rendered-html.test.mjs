@@ -66,3 +66,16 @@ test("does not ship the disposable Sites starter", async () => {
   const page = await readFile(new URL("app/page.tsx", root), "utf8");
   assert.doesNotMatch(page, /SkeletonPreview|codex-preview|Your site is taking shape/);
 });
+
+test("publishes crawl discovery files for the canonical domain", async () => {
+  const [robots, sitemap] = await Promise.all([
+    readFile(new URL("public/robots.txt", root), "utf8"),
+    readFile(new URL("public/sitemap.xml", root), "utf8"),
+  ]);
+
+  assert.match(robots, /^User-agent: \*$/m);
+  assert.match(robots, /^Allow: \/$/m);
+  assert.match(robots, /^Sitemap: https:\/\/ssdremover\.badgerworks\.dev\/sitemap\.xml$/m);
+  assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+  assert.match(sitemap, /<loc>https:\/\/ssdremover\.badgerworks\.dev\/<\/loc>/);
+});
