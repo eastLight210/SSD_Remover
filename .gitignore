@@ -31,5 +31,8 @@ playground.xcworkspace
 
 # Archives
 *.xcarchive
+
+# Local build and release output (script/release.sh)
+.tmp/
 WORKFLOW.md
 .omx/
