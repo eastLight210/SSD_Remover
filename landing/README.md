@@ -1,6 +1,7 @@
 # SSD Remover landing page
 
-Private-beta landing page for SSD Remover, built with vinext and OpenAI Sites.
+Landing page for SSD Remover, built with vinext and deployed to Cloudflare Workers
+(`ssd-remover-landing`, served at https://ssdremover.badgerworks.dev).
 
 ## Local development
 
@@ -20,17 +21,36 @@ npm test
 
 `npm test` produces a production build and runs source-level regression tests.
 
-## Beta signups
+## Deploy
+
+```bash
+npm run build
+npx wrangler deploy
+```
+
+Worker name, custom domain, D1 binding, and Access settings live in
+`wrangler.jsonc`. Apply new D1 migrations before deploying:
+
+```bash
+npx wrangler d1 migrations apply ssd-remover-landing --remote
+```
+
+## Release-update signups
 
 The signup form posts to `/api/beta` and stores email addresses plus drive use
-cases in the `beta_signups` D1 table. The binding name is declared in
-`.openai/hosting.json`; schema changes belong in `db/schema.ts` and require a
-new migration:
+cases in the `beta_signups` D1 table. Schema changes belong in `db/schema.ts`
+and require a new migration:
 
 ```bash
 npm run db:generate
 ```
 
-The app itself inspects processes and file paths locally. The landing form is a
-separate beta-invitation surface and stores only the fields disclosed beside
-the form.
+The app itself inspects processes and file paths locally. The landing form
+stores only the fields disclosed beside the form.
+
+## Admin
+
+`/admin` and `/api/admin/*` are protected by the `ssdremover` Cloudflare Access
+application (team `shy-tooth-8a67`). The Worker also verifies the Access JWT
+(`app/access-auth.ts`) and only admits emails listed in `ADMIN_EMAILS`, so the
+`*.workers.dev` URL cannot be used to bypass Access.
