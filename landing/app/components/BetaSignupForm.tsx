@@ -6,12 +6,12 @@ type FormStatus = "idle" | "submitting" | "success" | "error";
 
 export function BetaSignupForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
-  const [message, setMessage] = useState("We’ll only email about SSD Remover beta access.");
+  const [message, setMessage] = useState("We’ll only email about SSD Remover releases.");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("submitting");
-    setMessage("Saving your beta request…");
+    setMessage("Saving your request…");
 
     const form = new FormData(event.currentTarget);
     try {
@@ -27,7 +27,7 @@ export function BetaSignupForm() {
       const payload = (await response.json()) as { message?: string };
       if (!response.ok) throw new Error(payload.message || "Could not save your request.");
       setStatus("success");
-      setMessage(payload.message || "You’re on the private beta list.");
+      setMessage(payload.message || "You’re on the update list.");
       event.currentTarget.reset();
     } catch (error) {
       setStatus("error");
@@ -57,7 +57,7 @@ export function BetaSignupForm() {
         <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <button className="button button-primary submit-button" type="submit" disabled={status === "submitting"}>
-        {status === "submitting" ? "Joining…" : "Join the private beta"}
+        {status === "submitting" ? "Saving…" : "Get release updates"}
         <span aria-hidden="true">→</span>
       </button>
       <p className="form-message" aria-live="polite"><span aria-hidden="true" />{message}</p>

@@ -4,7 +4,7 @@ import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 
-test("landing source keeps the beta funnel and proof artifact intact", async () => {
+test("landing source keeps the download, signup, and proof artifact intact", async () => {
   const [page, layout, css, form, route, signupStore, schema, hosting] = await Promise.all([
     readFile(new URL("app/page.tsx", root), "utf8"),
     readFile(new URL("app/layout.tsx", root), "utf8"),
@@ -18,7 +18,9 @@ test("landing source keeps the beta funnel and proof artifact intact", async () 
 
   assert.match(page, /Find what&apos;s holding your drive/);
   assert.match(page, /ssd-remover-demo\.gif/);
-  assert.match(page, /Join the private beta/);
+  assert.match(page, /releases\/latest\/download\/SSD_Remover\.zip/);
+  assert.match(page, /Download for macOS/);
+  assert.match(form, /Get release updates/);
   assert.match(page, /Runs locally/);
   assert.match(layout, /SSD Remover — Find the blocker/);
   assert.match(layout, /https:\/\/ssdremover\.badgerworks\.dev/);

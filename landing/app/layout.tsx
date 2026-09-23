@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: "SSD Remover — Find the blocker. Eject safely.",
     description: "Turn “disk in use” into a short, reviewable, local workflow.",
     type: "website",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "SSD Remover private beta" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "SSD Remover for macOS" }],
   },
   twitter: {
     card: "summary_large_image",

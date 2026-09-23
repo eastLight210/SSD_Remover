@@ -1,11 +1,21 @@
 import { BetaSignupForm } from "./components/BetaSignupForm";
 
 const githubUrl = "https://github.com/eastLight210/SSD_Remover";
+// Always resolves to the newest published release asset.
+const downloadUrl = `${githubUrl}/releases/latest/download/SSD_Remover.zip`;
 
 function ArrowIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18">
       <path d="M4 10h11M11 6l4 4-4 4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18">
+      <path d="M10 3v10M6 9l4 4 4-4M4 16h12" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
     </svg>
   );
 }
@@ -51,14 +61,14 @@ export default function Home() {
       <section className="hero section" id="top">
         <div className="ambient ambient-one" aria-hidden="true" />
         <div className="ambient ambient-two" aria-hidden="true" />
-        <p className="eyebrow"><span /> Private beta · macOS 14+</p>
+        <p className="eyebrow"><span /> Free download · macOS 14+</p>
         <h1>Find what&apos;s holding your drive.<br /><span>Eject it safely.</span></h1>
         <p className="hero-copy">
           SSD Remover reveals the apps, background processes, and locked files blocking your external drive—then lets you close only what you choose.
         </p>
         <div className="hero-actions">
-          <a className="button button-primary" href="#join">
-            Join the private beta <ArrowIcon />
+          <a className="button button-primary" href={downloadUrl}>
+            <DownloadIcon /> Download for macOS
           </a>
           <a className="button button-secondary" href={githubUrl} target="_blank" rel="noreferrer">
             <GithubIcon /> View source
@@ -66,6 +76,7 @@ export default function Home() {
         </div>
         <ul className="trust-list" aria-label="Product highlights">
           <li>macOS 14+</li>
+          <li>Notarized by Apple</li>
           <li>Open source</li>
           <li>Runs locally</li>
         </ul>
@@ -79,7 +90,7 @@ export default function Home() {
               <span className="recording"><i /> Recorded on macOS</span>
             </figcaption>
             <div className="demo-media">
-              {/* The animated recording is the primary product proof for this beta page. */}
+              {/* The animated recording is the primary product proof on this page. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/ssd-remover-demo.gif" alt="SSD Remover finding a process that blocks an external drive, terminating the selected process, and ejecting the drive successfully" />
             </div>
@@ -146,10 +157,10 @@ export default function Home() {
       <section className="join section" id="join">
         <div className="join-grid">
           <div className="join-copy">
-            <p className="eyebrow"><span /> Private beta</p>
+            <p className="eyebrow"><span /> Release updates</p>
             <h2>Help make external drives less frustrating.</h2>
-            <p>Join a small group of macOS users testing safer eject flows before the first broadly distributed build.</p>
-            <div className="beta-note"><ShieldIcon /><span>The app runs locally. This form stores only your email and drive use case for beta invitations.</span></div>
+            <p>Get an email when a new version ships, and tell us how you use external drives so we can focus on the right fixes.</p>
+            <div className="beta-note"><ShieldIcon /><span>The app runs locally. This form stores only your email and drive use case for release updates.</span></div>
           </div>
           <BetaSignupForm />
         </div>
@@ -158,7 +169,7 @@ export default function Home() {
       <footer>
         <a className="brand" href="#top"><span className="brand-mark" aria-hidden="true"><span /></span><span>SSD Remover</span></a>
         <p>Make “disk in use” actionable.</p>
-        <div><a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a><a href="#privacy">Privacy</a></div>
+        <div><a href={downloadUrl}>Download</a><a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a><a href="#privacy">Privacy</a></div>
       </footer>
     </main>
   );
