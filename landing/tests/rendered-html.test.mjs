@@ -5,7 +5,7 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 
 test("landing source keeps the download, signup, and proof artifact intact", async () => {
-  const [page, layout, css, form, route, signupStore, schema, hosting] = await Promise.all([
+  const [page, layout, css, form, route, signupStore, schema, wrangler] = await Promise.all([
     readFile(new URL("app/page.tsx", root), "utf8"),
     readFile(new URL("app/layout.tsx", root), "utf8"),
     readFile(new URL("app/globals.css", root), "utf8"),
@@ -13,7 +13,7 @@ test("landing source keeps the download, signup, and proof artifact intact", asy
     readFile(new URL("app/api/beta/route.ts", root), "utf8"),
     readFile(new URL("db/beta-signups.ts", root), "utf8"),
     readFile(new URL("db/schema.ts", root), "utf8"),
-    readFile(new URL(".openai/hosting.json", root), "utf8"),
+    readFile(new URL("wrangler.jsonc", root), "utf8"),
   ]);
 
   assert.match(page, /Find what&apos;s holding your drive/);
@@ -30,10 +30,8 @@ test("landing source keeps the download, signup, and proof artifact intact", asy
   assert.match(route, /upsertBetaSignup/);
   assert.match(signupStore, /ON CONFLICT\(email\)/);
   assert.match(schema, /beta_signups/);
-  const hostingConfig = JSON.parse(hosting);
-  assert.equal(hostingConfig.d1, "DB");
-  assert.equal(hostingConfig.r2, null);
-  assert.match(hostingConfig.project_id, /^appgprj_/);
+  assert.match(wrangler, /"binding": "DB"/);
+  assert.match(wrangler, /"pattern": "ssdremover\.badgerworks\.dev", "custom_domain": true/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /--color-bg-accent:/);
 });
