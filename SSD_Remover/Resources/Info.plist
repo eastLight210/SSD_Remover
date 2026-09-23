@@ -22,5 +22,11 @@
 	<string>2</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/eastLight210/SSD_Remover/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>LBPIZAYTsZSiAi9dd8axws+GWchPvO5oPWP8M9J940g=</string>
 </dict>
 </plist>

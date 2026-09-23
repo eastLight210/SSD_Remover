@@ -23,6 +23,7 @@ It automatically detects processes blocking a disk, lets you selectively termina
 - **Privilege Escalation** - Requests admin privileges for root process termination
 - **Spotlight Warning** - Displays a warning banner when mds/mds_stores is detected
 - **Launch at Login** - Auto-launch on system startup
+- **In-App Updates** - Checks for new releases daily and installs them in place (Sparkle)
 - **CLI Mode** - Available for terminal automation
 
 ## Installation
@@ -30,6 +31,9 @@ It automatically detects processes blocking a disk, lets you selectively termina
 1. Download `SSD_Remover.zip` from the [latest release](https://github.com/eastLight210/SSD_Remover/releases/latest)
 2. Unzip the file
 3. Move `SSD_Remover.app` to the Applications folder
+
+Later versions arrive in the app itself: it checks daily, or choose **Check for Updates…** from the `⋯` menu.
+The `ssd-remover` symlink below points into the app bundle, so it keeps working across updates.
 
 ### Install the CLI command (optional)
 
@@ -172,6 +176,16 @@ xcodebuild test -scheme SSD_Remover -destination 'platform=macOS'
 script/test_cli_installation.sh \
   /path/to/SSD_Remover.app/Contents/MacOS/SSD_Remover
 ```
+
+## Releasing
+
+`script/release.sh <tag> --publish` builds, signs, notarizes, and uploads `SSD_Remover.zip`
+together with a Sparkle `appcast.xml`. Installed apps read
+`releases/latest/download/appcast.xml`, so publishing the release is what ships the update.
+
+- Bump both `CFBundleShortVersionString` and `CFBundleVersion`; Sparkle compares `CFBundleVersion`.
+- The Sparkle EdDSA private key lives in the login Keychain. Back it up
+  (`generate_keys -x <file>` from Sparkle's `bin/`); without it, installed apps can no longer be updated.
 
 ## License
 

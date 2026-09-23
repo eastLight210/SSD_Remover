@@ -23,6 +23,7 @@ macOS 메뉴바 유틸리티로, 외장 SSD/디스크를 안전하게 추출할 
 - **권한 상승** - root 프로세스 종료 시 관리자 권한 요청
 - **Spotlight 경고** - mds/mds_stores 프로세스 감지 시 경고 배너 표시
 - **로그인 시 자동 실행** - 시스템 시작 시 자동 실행 설정
+- **앱 내 업데이트** - 매일 새 릴리스를 확인하고 앱 안에서 바로 설치 (Sparkle)
 - **CLI 모드** - 터미널에서 자동화 용도로 사용 가능
 
 ## 설치
@@ -30,6 +31,9 @@ macOS 메뉴바 유틸리티로, 외장 SSD/디스크를 안전하게 추출할 
 1. [최신 릴리즈](https://github.com/eastLight210/SSD_Remover/releases/latest)에서 `SSD_Remover.zip` 다운로드
 2. 압축 해제
 3. `SSD_Remover.app`을 Applications 폴더로 이동
+
+이후 버전은 앱 안에서 업데이트됩니다. 매일 자동으로 확인하며, `⋯` 메뉴의 **Check for Updates…**로 직접 확인할 수도 있습니다.
+아래 `ssd-remover` 심볼릭 링크는 앱 번들 안을 가리키므로 업데이트 후에도 그대로 동작합니다.
 
 ### CLI 명령 설치(선택 사항)
 
