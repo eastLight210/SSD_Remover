@@ -30,7 +30,6 @@ It automatically detects processes blocking a disk, lets you selectively termina
 1. Download `SSD_Remover.zip` from the [latest release](https://github.com/eastLight210/SSD_Remover/releases/latest)
 2. Unzip the file
 3. Move `SSD_Remover.app` to the Applications folder
-4. On first launch, if you see an "unidentified developer" warning, right-click > Open to run
 
 ### Install the CLI command (optional)
 

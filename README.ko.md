@@ -30,7 +30,6 @@ macOS 메뉴바 유틸리티로, 외장 SSD/디스크를 안전하게 추출할 
 1. [최신 릴리즈](https://github.com/eastLight210/SSD_Remover/releases/latest)에서 `SSD_Remover.zip` 다운로드
 2. 압축 해제
 3. `SSD_Remover.app`을 Applications 폴더로 이동
-4. 처음 실행 시 "확인되지 않은 개발자" 경고가 뜨면 우클릭 > 열기로 실행
 
 ### CLI 명령 설치(선택 사항)
 
