@@ -6,6 +6,11 @@ options:
   xcodeVersion: "26.0"
   generateEmptyDirectories: true
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.0
+
 settings:
   base:
     SWIFT_VERSION: "6.2"
@@ -20,6 +25,8 @@ targets:
         excludes:
           - "**/*.entitlements"
           - "**/Info.plist"
+    dependencies:
+      - package: Sparkle
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.honeybadger210.SSD-Remover
@@ -32,6 +39,10 @@ targets:
       properties:
         CFBundleDisplayName: SSD Remover
         LSUIElement: true
+        # Sparkle: the latest GitHub release carries appcast.xml (see script/release.sh).
+        SUFeedURL: https://github.com/eastLight210/SSD_Remover/releases/latest/download/appcast.xml
+        SUPublicEDKey: "LBPIZAYTsZSiAi9dd8axws+GWchPvO5oPWP8M9J940g="
+        SUEnableAutomaticChecks: true
 
   SSD_RemoverTests:
     type: bundle.unit-test

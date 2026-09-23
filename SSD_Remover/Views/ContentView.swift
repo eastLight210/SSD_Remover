@@ -4,16 +4,20 @@ import SwiftUI
 
 struct ContentView: View {
     @Bindable var viewModel: AppViewModel
+    private let updater: AppUpdater?
     private let autoSelectFirstVolume: Bool
     @State private var ejectViewModel: EjectViewModel?
     @State private var scanTask: Task<Void, Never>?
     @State private var ejectTask: Task<Void, Never>?
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var automaticallyChecksForUpdates: Bool
     @State private var isQuitConfirmationPresented = false
 
-    init(viewModel: AppViewModel, autoSelectFirstVolume: Bool = false) {
+    init(viewModel: AppViewModel, updater: AppUpdater? = nil, autoSelectFirstVolume: Bool = false) {
         self.viewModel = viewModel
+        self.updater = updater
         self.autoSelectFirstVolume = autoSelectFirstVolume
+        _automaticallyChecksForUpdates = State(initialValue: updater?.automaticallyChecksForUpdates ?? false)
     }
 
     var body: some View {
@@ -45,6 +49,9 @@ struct ContentView: View {
         }
         .onChange(of: launchAtLogin) { _, newValue in
             updateLaunchAtLogin(newValue)
+        }
+        .onChange(of: automaticallyChecksForUpdates) { _, newValue in
+            updater?.automaticallyChecksForUpdates = newValue
         }
         .onChange(of: viewModel.scanState) { _, state in
             announceScanState(state)
@@ -169,6 +176,16 @@ struct ContentView: View {
                 .disabled(ejectViewModel != nil || viewModel.scanState != .idle)
 
                 Toggle("Launch at Login", isOn: $launchAtLogin)
+
+                if let updater {
+                    Divider()
+
+                    Button("Check for Updates…", systemImage: "arrow.down.circle") {
+                        updater.checkForUpdates()
+                    }
+
+                    Toggle("Automatically Check for Updates", isOn: $automaticallyChecksForUpdates)
+                }
 
                 Divider()
 

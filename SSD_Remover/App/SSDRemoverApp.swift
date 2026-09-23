@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct SSDRemoverApp: App {
     private let bootstrap: SSDRemoverAppBootstrap
+    private let updater: AppUpdater?
     private let isUIPreviewEnabled: Bool
 
     init() {
@@ -23,6 +24,7 @@ struct SSDRemoverApp: App {
         switch bootstrap.launchMode {
         case .menuBar:
             self.bootstrap = bootstrap
+            self.updater = AppUpdater.isSupportedInCurrentProcess && !isUIPreviewEnabled ? AppUpdater() : nil
         case .cli(let arguments):
             let result = BlockingCLICommandExecutor(executor: LiveCLICommandExecutor())
                 .run(arguments: arguments)
@@ -43,7 +45,7 @@ struct SSDRemoverApp: App {
             isInserted: .constant(bootstrap.launchMode.isMenuBar)
         ) {
             if let viewModel = bootstrap.viewModel {
-                ContentView(viewModel: viewModel)
+                ContentView(viewModel: viewModel, updater: updater)
             } else {
                 EmptyView()
             }

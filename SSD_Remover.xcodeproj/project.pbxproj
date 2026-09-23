@@ -18,6 +18,7 @@
 		2CBF8FB46319EC451530836D /* MockProcessScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D62546C5326EB337DE35BE /* MockProcessScanner.swift */; };
 		2F883B724DB5BA725BF6CA05 /* CLICommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E048D5D326DCBDFC54B5FD6D /* CLICommandParser.swift */; };
 		310B66348E47FA1AAE6852E5 /* EjectViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED22AB12C2714DE9C95D6005 /* EjectViewModel.swift */; };
+		3111EC7DF947956C2DC63A46 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 22556D469AA60E1913694404 /* Sparkle */; };
 		318770EB660B5C7FCF949D21 /* PrivilegedExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21588671EF663DAD3FA52A8A /* PrivilegedExecutorTests.swift */; };
 		33A17646091E22A376B2399D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1453186F856FAB7EC9D97B8 /* Assets.xcassets */; };
 		36CE877A497BEDD319FE6589 /* EjectViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ED227BAFE3B3A20294FB8C /* EjectViewModelTests.swift */; };
@@ -53,6 +54,7 @@
 		9D1DA89FAE5C88D95C88016A /* CLICommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E9F859F0324CEAC3E8EE95 /* CLICommand.swift */; };
 		A2DE4F9C5B7CD47766501A79 /* SSDRemoverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112778C0C05881F4274CBF08 /* SSDRemoverApp.swift */; };
 		A646EA6D5922A5397166BB27 /* DiskInfoParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96935C4D4148A76337B4313 /* DiskInfoParserTests.swift */; };
+		A821D80D3283EFE57C888E74 /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9E70E573F90AF79251425A /* AppUpdater.swift */; };
 		AF31464E686E6430E28ECED7 /* AppLaunchModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F169EF42E69ADA4C0909DAC4 /* AppLaunchModeTests.swift */; };
 		B2E54889FDDD1720F5D0EC80 /* ExternalVolumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48EACFAD5C5D0F86643F6906 /* ExternalVolumeTests.swift */; };
 		B7A1678FB8AB09F4E905FBAF /* ShellExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C248C49504AD67A10BC1F6BF /* ShellExecutor.swift */; };
@@ -154,9 +156,28 @@
 		ED22AB12C2714DE9C95D6005 /* EjectViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EjectViewModel.swift; sourceTree = "<group>"; };
 		EF656BFBDC6071D5EBA5D587 /* BlockingProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingProcess.swift; sourceTree = "<group>"; };
 		F169EF42E69ADA4C0909DAC4 /* AppLaunchModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchModeTests.swift; sourceTree = "<group>"; };
+		FC9E70E573F90AF79251425A /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		67F7441D5B91E5DABE6D6DD6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3111EC7DF947956C2DC63A46 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
+		26EC5223C78330709CC59128 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		278460C6B6623CCA82335CDD /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -227,6 +248,7 @@
 				6F9278919D855D16C839F267 /* Models */,
 				3C08ACD96C72E30B5266966D /* Resources */,
 				A0069B252410EE8983C59CC9 /* Services */,
+				26EC5223C78330709CC59128 /* Support */,
 				BB73DE876BF40A30A28733CF /* Utilities */,
 				6E2C3A871881964AEB194B7E /* ViewModels */,
 				278460C6B6623CCA82335CDD /* Views */,
@@ -302,6 +324,7 @@
 		A0069B252410EE8983C59CC9 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				FC9E70E573F90AF79251425A /* AppUpdater.swift */,
 				03B43539417899683ECA8AF3 /* DiskEjectService.swift */,
 				17949EF2CB5E1ECABF48F026 /* PrivilegedExecutor.swift */,
 				B1B1C9A141FE502E1ED2B007 /* ProcessScannerService.swift */,
@@ -400,6 +423,7 @@
 			buildPhases = (
 				C63D37722AABDCCE6654CEF4 /* Sources */,
 				41C359C32067A772F1293E21 /* Resources */,
+				67F7441D5B91E5DABE6D6DD6 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -407,6 +431,7 @@
 			);
 			name = SSD_Remover;
 			packageProductDependencies = (
+				22556D469AA60E1913694404 /* Sparkle */,
 			);
 			productName = SSD_Remover;
 			productReference = 2A54BC1DAFAEF2C5E03976F1 /* SSD_Remover.app */;
@@ -450,6 +475,9 @@
 			);
 			mainGroup = 7C694C3090DA0919D2DC1252;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FE64D9F1C1EB517BA7F24A12 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F3BA9A09D9D8D1F1B205FF4D /* Products */;
 			projectDirPath = "";
@@ -515,6 +543,7 @@
 			files = (
 				1E2659C60CBB49D38C4FA9AF /* AppBootstrap.swift in Sources */,
 				B7E3A2702F3323DDF081989C /* AppLaunchMode.swift in Sources */,
+				A821D80D3283EFE57C888E74 /* AppUpdater.swift in Sources */,
 				8F6F717A1761A20DB4BF71C6 /* AppViewModel.swift in Sources */,
 				55F0BB1A3029763D8A6287DC /* BlockingProcess.swift in Sources */,
 				9D1DA89FAE5C88D95C88016A /* CLICommand.swift in Sources */,
@@ -631,7 +660,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-Remover";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.honeybadger210.SSD-Remover";
 				SDKROOT = macosx;
 				SWIFT_STRICT_CONCURRENCY = complete;
 			};
@@ -711,7 +740,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-RemoverTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.honeybadger210.SSD-RemoverTests";
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SSD_Remover.app/Contents/MacOS/SSD_Remover";
 			};
@@ -728,7 +757,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-RemoverTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.honeybadger210.SSD-RemoverTests";
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SSD_Remover.app/Contents/MacOS/SSD_Remover";
 			};
@@ -746,7 +775,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.donghyeok.kim.SSD-Remover";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.honeybadger210.SSD-Remover";
 				SDKROOT = macosx;
 				SWIFT_STRICT_CONCURRENCY = complete;
 			};
@@ -783,6 +812,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FE64D9F1C1EB517BA7F24A12 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		22556D469AA60E1913694404 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE64D9F1C1EB517BA7F24A12 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 09A6BFBA68D9801264B5954C /* Project object */;
 }
