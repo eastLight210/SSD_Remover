@@ -34,5 +34,8 @@ playground.xcworkspace
 
 # Local build and release output (script/release.sh)
 .tmp/
+
+# Coverage data written by test runs
+*.profraw
 WORKFLOW.md
 .omx/
