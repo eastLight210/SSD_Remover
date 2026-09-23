@@ -277,6 +277,51 @@ struct CLIRunnerTests {
         #expect(result == .success("SSD_Remover 9.8.7 (build 654)"))
     }
 
+    @Test("PATH 심링크로 bare name 실행 시에도 OS 실행 경로로 앱 번들 버전을 찾음")
+    func versionResolvesThroughPathSymlink() throws {
+        let fileManager = FileManager.default
+        let root = fileManager.temporaryDirectory
+            .appendingPathComponent("CLIAppVersionTests-\(UUID().uuidString)")
+        defer { try? fileManager.removeItem(at: root) }
+
+        let contents = root.appendingPathComponent("Fake.app/Contents")
+        let macOS = contents.appendingPathComponent("MacOS")
+        try fileManager.createDirectory(at: macOS, withIntermediateDirectories: true)
+        let executable = macOS.appendingPathComponent("SSD_Remover")
+        try Data().write(to: executable)
+        let info: [String: Any] = [
+            "CFBundleIdentifier": "test.fake.\(UUID().uuidString)",
+            "CFBundleShortVersionString": "1.2.3",
+            "CFBundleVersion": "45"
+        ]
+        try PropertyListSerialization
+            .data(fromPropertyList: info, format: .xml, options: 0)
+            .write(to: contents.appendingPathComponent("Info.plist"))
+
+        let bin = root.appendingPathComponent("bin")
+        try fileManager.createDirectory(at: bin, withIntermediateDirectories: true)
+        let symlink = bin.appendingPathComponent("ssd-remover")
+        try fileManager.createSymbolicLink(at: symlink, withDestinationURL: executable)
+
+        // Bundle without version keys, as Bundle.main is for the symlinked executable.
+        let emptyBundleURL = root.appendingPathComponent("Empty")
+        try fileManager.createDirectory(at: emptyBundleURL, withIntermediateDirectories: true)
+        let emptyBundle = try #require(Bundle(url: emptyBundleURL))
+
+        // The OS reports the absolute path even when argv[0] is just "ssd-remover".
+        let resolved = CLIAppVersion.current(bundle: emptyBundle) { symlink.path }
+        #expect(resolved == CLIAppVersion(marketingVersion: "1.2.3", buildNumber: "45"))
+
+        // A bare command name must never be resolved against the current directory.
+        #expect(CLIAppVersion.current(bundle: emptyBundle) { "ssd-remover" } == nil)
+    }
+
+    @Test("processExecutablePath는 절대 경로를 반환")
+    func processExecutablePathIsAbsolute() throws {
+        let path = try #require(CLIAppVersion.processExecutablePath())
+        #expect(path.hasPrefix("/"))
+    }
+
     @Test("global help는 간결하고 command help는 기본값과 안전 규칙을 설명")
     func helpOutputDocumentsContract() async {
         let runner = makeRunner(volumeMonitor: MockVolumeMonitor())
