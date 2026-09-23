@@ -156,8 +156,8 @@ footer { width: min(1120px, calc(100% - 40px)); min-height: 110px; margin: 0 aut
 .admin-main { min-height: 100vh; padding: 24px 32px 72px; background: radial-gradient(circle at 50% -20%, rgba(10,132,255,.16), transparent 38rem); }
 .admin-header { width: min(1240px, 100%); min-height: 58px; margin: 0 auto; padding-bottom: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(145,155,173,.16); }
 .admin-account { display: flex; align-items: center; gap: 16px; color: var(--color-text-secondary); font-size: 12px; }
-.admin-account button { padding: 8px 12px; border: 1px solid var(--color-border-default); border-radius: var(--radius-full); cursor: pointer; color: var(--color-text-primary); background: transparent; transition: border-color .2s ease, background .2s ease; }
-.admin-account button:hover { border-color: var(--color-border-accent); background: rgba(10,132,255,.08); }
+.admin-account button, .admin-account a { padding: 8px 12px; border: 1px solid var(--color-border-default); border-radius: var(--radius-full); cursor: pointer; color: var(--color-text-primary); background: transparent; transition: border-color .2s ease, background .2s ease; }
+.admin-account button:hover, .admin-account a:hover { border-color: var(--color-border-accent); background: rgba(10,132,255,.08); }
 .admin-content { width: min(1240px, 100%); margin: 0 auto; }
 .admin-title-row { padding: 76px 0 38px; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
 .admin-title-row h1 { margin: 20px 0 0; font-size: clamp(46px, 6vw, 72px); line-height: 1; letter-spacing: -.06em; }
@@ -192,10 +192,6 @@ footer { width: min(1120px, calc(100% - 40px)); min-height: 110px; margin: 0 aut
 .admin-use-case { padding: 6px 9px; border: 1px solid rgba(67,215,255,.16); border-radius: var(--radius-full); color: var(--color-text-accent); background: rgba(67,215,255,.06); font-size: 11px; }
 .admin-empty { padding: 76px 24px; text-align: center; }
 .admin-empty strong { font-size: 18px; }.admin-empty p { margin: 9px 0 0; color: var(--color-text-secondary); font-size: 13px; }
-.admin-login-main { min-height: 100vh; padding: 32px 20px; display: grid; place-items: center; background: radial-gradient(circle at 50% 10%, rgba(10,132,255,.18), transparent 34rem); }
-.admin-login-card { width: min(100%, 460px); padding: 34px; border: 1px solid rgba(145,155,173,.2); border-radius: var(--radius-xl); background: rgba(15,17,23,.92); box-shadow: 0 30px 90px rgba(0,0,0,.42); }
-.admin-login-card > .eyebrow { margin-top: 54px; }.admin-login-card h1 { margin: 18px 0 0; font-size: 38px; letter-spacing: -.05em; }.admin-login-copy { margin: 16px 0 0; color: var(--color-text-secondary); font-size: 13px; line-height: 1.6; }.admin-login-copy strong { color: var(--color-text-primary); }
-.admin-login-form { margin-top: 28px; display: grid; gap: 10px; }.admin-login-form label { font-size: 12px; font-weight: 700; }.admin-login-form input { width: 100%; height: 50px; padding: 0 14px; color: var(--color-text-primary); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); outline: none; background: var(--color-bg-canvas); }.admin-login-form input:focus { border-color: var(--color-border-accent); box-shadow: 0 0 0 3px rgba(10,132,255,.12); }.admin-login-form .button { width: 100%; margin-top: 8px; border: 0; }.admin-login-error { margin: 2px 0 0; color: var(--color-status-danger); font-size: 12px; }.admin-login-card > .text-link { margin-top: 24px; }
 
 @media (max-width: 900px) {
   .nav-links { display: none; }
@@ -214,7 +210,6 @@ footer { width: min(1120px, calc(100% - 40px)); min-height: 110px; margin: 0 aut
   .join { padding: 60px 0 100px; }.beta-form { padding: 20px; }
   footer { padding: 28px 0; grid-template-columns: 1fr auto; } footer > p { display: none; } footer > div { gap: 16px; }
   .admin-main { padding: 16px 12px 48px; }.admin-header { align-items: flex-start; }.admin-account { align-items: flex-end; flex-direction: column; gap: 8px; }.admin-account > span { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }.admin-title-row { padding-top: 54px; }.admin-export { width: 100%; }.admin-panel-heading, .admin-use-cases { padding-inline: 18px; }.admin-filters button, .admin-filters > a { flex: 1; }.admin-table th, .admin-table td { padding-inline: 18px; }
-  .admin-login-card { padding: 28px 22px; }.admin-login-card > .eyebrow { margin-top: 44px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

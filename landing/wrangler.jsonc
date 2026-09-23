@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ssd-remover-landing",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "workers_dev": true,
+  // /admin is protected by a Cloudflare Access application; the Worker also
+  // verifies the Access JWT against these values (see app/access-auth.ts).
+  "vars": {
+    "CF_ACCESS_TEAM_DOMAIN": "",
+    "CF_ACCESS_AUD": "",
+    "ADMIN_EMAILS": "eastlight210@gmail.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ssd-remover-landing",
+      "database_id": "2ca3a948-a17d-46c9-a065-722de5b44485",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { accessLogoutPath } from "../access-auth";
 import { requireAdminUser } from "../admin-auth";
 import {
   ensureBetaSignupsTable,
@@ -39,7 +40,7 @@ function formatDate(value: number | null): string {
 }
 
 export default async function AdminPage({ searchParams }: { searchParams: AdminSearchParams }) {
-  const user = await requireAdminUser("/admin");
+  const user = await requireAdminUser();
   const params = await searchParams;
   const query = firstValue(params.q).trim();
   const requestedUseCase = firstValue(params.useCase);
@@ -65,7 +66,7 @@ export default async function AdminPage({ searchParams }: { searchParams: AdminS
         </Link>
         <div className="admin-account">
           <span>{user.email}</span>
-          <form action="/api/admin/logout" method="post"><button type="submit">Sign out</button></form>
+          <a href={accessLogoutPath()}>Sign out</a>
         </div>
       </header>
 

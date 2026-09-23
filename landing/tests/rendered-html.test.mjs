@@ -38,27 +38,25 @@ test("landing source keeps the download, signup, and proof artifact intact", asy
   assert.match(css, /--color-bg-accent:/);
 });
 
-test("admin signups require a signed session and provide a protected CSV export", async () => {
-  const [adminPage, adminAuth, adminSession, loginPage, loginRoute, chatGPTAuth, exportRoute] = await Promise.all([
+test("admin signups require a verified Cloudflare Access identity and provide a protected CSV export", async () => {
+  const [adminPage, adminAuth, accessAuth, exportRoute, wrangler] = await Promise.all([
     readFile(new URL("app/admin/page.tsx", root), "utf8"),
     readFile(new URL("app/admin-auth.ts", root), "utf8"),
-    readFile(new URL("app/admin-session.ts", root), "utf8"),
-    readFile(new URL("app/admin/login/page.tsx", root), "utf8"),
-    readFile(new URL("app/api/admin/login/route.ts", root), "utf8"),
-    readFile(new URL("app/chatgpt-auth.ts", root), "utf8"),
+    readFile(new URL("app/access-auth.ts", root), "utf8"),
     readFile(new URL("app/api/admin/signups/export/route.ts", root), "utf8"),
+    readFile(new URL("wrangler.jsonc", root), "utf8"),
   ]);
 
-  assert.match(adminPage, /requireAdminUser\("\/admin"\)/);
+  assert.match(adminPage, /requireAdminUser\(\)/);
   assert.match(adminPage, /Download CSV/);
   assert.match(adminPage, /export const dynamic = "force-dynamic"/);
-  assert.match(adminAuth, /hasValidAdminSession/);
-  assert.match(adminSession, /SSD_REMOVER_ADMIN_PASSWORD/);
-  assert.match(adminSession, /SSD_REMOVER_ADMIN_SESSION_SECRET/);
-  assert.match(adminSession, /HttpOnly; Secure; SameSite=Strict/);
-  assert.match(loginPage, /autoComplete="current-password"/);
-  assert.match(loginRoute, /verifyAdminPassword/);
-  assert.match(chatGPTAuth, /oai-authenticated-user-id/);
+  assert.match(adminAuth, /getAccessUser/);
+  assert.match(adminAuth, /notFound\(\)/);
+  assert.match(accessAuth, /cf-access-jwt-assertion/);
+  assert.match(accessAuth, /cdn-cgi\/access\/certs/);
+  assert.match(accessAuth, /RSASSA-PKCS1-v1_5/);
+  assert.match(accessAuth, /ADMIN_EMAILS/);
+  assert.match(wrangler, /"CF_ACCESS_AUD"/);
   assert.match(exportRoute, /getAdminUser/);
   assert.match(exportRoute, /Content-Disposition/);
   assert.match(exportRoute, /Cache-Control.*private, no-store/s);
