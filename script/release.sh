@@ -79,7 +79,14 @@ PUBLIC_ED_KEY="$(plist_value SUPublicEDKey 2>/dev/null)" \
   || die "$TAG has no SUPublicEDKey in Info.plist; Sparkle updates need it"
 
 # Sparkle compares CFBundleVersion, so a release that doesn't bump it is never offered.
-# Re-publishing the same tag is fine; a new tag must raise the build number.
+PREVIOUS_TAG="$(git -C "$ROOT_DIR" describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)"
+if [[ -n "$PREVIOUS_TAG" ]]; then
+  PREVIOUS_BUILD="$(git -C "$ROOT_DIR" show "$PREVIOUS_TAG:SSD_Remover/Resources/Info.plist" \
+    | plutil -extract CFBundleVersion raw -o - -)"
+  (( BUILD_VERSION > PREVIOUS_BUILD )) \
+    || die "CFBundleVersion $BUILD_VERSION must be greater than $PREVIOUS_TAG's $PREVIOUS_BUILD"
+fi
+# Re-publishing the same tag is fine; a new tag must raise the published build number.
 if [[ $PUBLISH -eq 1 ]] \
   && PUBLISHED_APPCAST="$(curl -fsSL "$REPO_URL/releases/latest/download/appcast.xml" 2>/dev/null)" \
   && [[ "$PUBLISHED_APPCAST" != *"/releases/download/$TAG/"* ]]; then

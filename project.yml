@@ -38,6 +38,9 @@ targets:
       path: SSD_Remover/Resources/Info.plist
       properties:
         CFBundleDisplayName: SSD Remover
+        # Versions live here; `xcodegen generate` rewrites Info.plist from these properties.
+        CFBundleShortVersionString: "1.1.0"
+        CFBundleVersion: "2"
         LSUIElement: true
         # Sparkle: the latest GitHub release carries appcast.xml (see script/release.sh).
         SUFeedURL: https://github.com/eastLight210/SSD_Remover/releases/latest/download/appcast.xml
