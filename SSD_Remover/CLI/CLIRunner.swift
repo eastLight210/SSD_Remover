@@ -18,12 +18,22 @@ struct CLIAppVersion: Equatable, Sendable, Encodable {
     let marketingVersion: String
     let buildNumber: String
 
-    static func current(bundle: Bundle = .main) -> CLIAppVersion? {
+    /// `executablePath` must come from the OS rather than `CommandLine.arguments[0]`:
+    /// when the CLI is invoked by bare name through a PATH symlink, argv[0] is just
+    /// the command name and would resolve relative to the current directory.
+    static func current(
+        bundle: Bundle = .main,
+        executablePath: () -> String? = CLIAppVersion.processExecutablePath
+    ) -> CLIAppVersion? {
         if let version = version(in: bundle) {
             return version
         }
 
-        let executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+        guard let path = executablePath(), path.hasPrefix("/") else {
+            return nil
+        }
+
+        let executableURL = URL(fileURLWithPath: path)
             .resolvingSymlinksInPath()
         let appBundleURL = executableURL
             .deletingLastPathComponent()
@@ -36,6 +46,15 @@ struct CLIAppVersion: Equatable, Sendable, Encodable {
         }
 
         return version(in: executableBundle)
+    }
+
+    /// Absolute path of the running executable as reported by the kernel.
+    static func processExecutablePath() -> String? {
+        var buffer = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
+        if proc_pidpath(getpid(), &buffer, UInt32(buffer.count)) > 0 {
+            return String(cString: buffer)
+        }
+        return Bundle.main.executableURL?.path
     }
 
     private static func version(in bundle: Bundle) -> CLIAppVersion? {
