@@ -180,4 +180,4 @@ script/test_cli_installation.sh \
 
 ## 라이선스
 
-MIT License
+[MIT License](LICENSE)

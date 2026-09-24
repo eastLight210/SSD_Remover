@@ -189,4 +189,4 @@ together with a Sparkle `appcast.xml`. Installed apps read
 
 ## License
 
-MIT License
+[MIT License](LICENSE)
