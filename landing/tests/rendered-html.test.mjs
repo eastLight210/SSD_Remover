@@ -16,7 +16,7 @@ test("landing source keeps the download, update copy, and proof artifact intact"
   assert.match(page, /ssd-remover-demo\.webm/);
   assert.match(page, /ssd-remover-demo\.mp4/);
   assert.match(page, /<video[\s\S]*autoPlay[\s\S]*muted[\s\S]*playsInline/);
-  assert.match(page, /releases\/latest\/download\/SSD_Remover\.zip/);
+  assert.match(page, /releases\/latest\/download\/SSD_Remover\.dmg/);
   assert.match(page, /Download for macOS/);
   assert.match(page, /Automatic updates/);
   assert.match(page, /Runs locally/);

@@ -28,9 +28,9 @@ macOS 메뉴바 유틸리티로, 외장 SSD/디스크를 안전하게 추출할 
 
 ## 설치
 
-1. [최신 릴리즈](https://github.com/eastLight210/SSD_Remover/releases/latest)에서 `SSD_Remover.zip` 다운로드
-2. 압축 해제
-3. `SSD_Remover.app`을 Applications 폴더로 이동
+1. [최신 릴리즈](https://github.com/eastLight210/SSD_Remover/releases/latest)에서 `SSD_Remover.dmg` 다운로드
+2. 열린 창에서 `SSD_Remover.app`을 Applications 폴더로 드래그
+3. 디스크 이미지가 아닌 Applications 폴더에서 앱을 실행한 뒤 디스크 이미지 추출
 
 이후 버전은 앱 안에서 업데이트됩니다. 매일 자동으로 확인하며, `⋯` 메뉴의 **Check for Updates…**로 직접 확인할 수도 있습니다.
 아래 `ssd-remover` 심볼릭 링크는 앱 번들 안을 가리키므로 업데이트 후에도 그대로 동작합니다.
