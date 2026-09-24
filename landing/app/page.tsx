@@ -1,5 +1,3 @@
-import { BetaSignupForm } from "./components/BetaSignupForm";
-
 const githubUrl = "https://github.com/eastLight210/SSD_Remover";
 // Always resolves to the newest published release asset.
 const downloadUrl = `${githubUrl}/releases/latest/download/SSD_Remover.zip`;
@@ -154,15 +152,19 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="join section" id="join">
+      <section className="join section" id="updates">
         <div className="join-grid">
           <div className="join-copy">
-            <p className="eyebrow"><span /> Release updates</p>
-            <h2>Help make external drives less frustrating.</h2>
-            <p>Get an email when a new version ships, and tell us how you use external drives so we can focus on the right fixes.</p>
-            <div className="beta-note"><ShieldIcon /><span>The app runs locally. This form stores only your email and drive use case for release updates.</span></div>
+            <p className="eyebrow"><span /> Automatic updates</p>
+            <h2>Install once.<br />It keeps itself current.</h2>
+            <p>SSD Remover checks for new versions once a day and installs them in place. No sign-up or mailing list—choose Check for Updates… in the app menu anytime.</p>
           </div>
-          <BetaSignupForm />
+          <div className="join-actions">
+            <a className="button button-primary" href={downloadUrl}>
+              <DownloadIcon /> Download for macOS
+            </a>
+            <p><ShieldIcon /><span>Every update is notarized by Apple and verified against the app&apos;s signing key before it installs.</span></p>
+          </div>
         </div>
       </section>
 
