@@ -112,7 +112,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .recording { justify-self: end; display: flex; align-items: center; gap: 7px; }
 .recording i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-status-danger); box-shadow: 0 0 10px rgba(255,92,92,.7); }
 .demo-media { aspect-ratio: 16 / 9; background: #030405; }
-.demo-media img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.demo-media video { width: 100%; height: 100%; display: block; object-fit: cover; }
 
 .workflow { padding: 130px 0; scroll-margin-top: 80px; }
 .section-heading { max-width: 720px; margin: 0 auto 58px; text-align: center; }
@@ -171,6 +171,6 @@ footer { width: min(1120px, calc(100% - 40px)); min-height: 110px; margin: 0 aut
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
-  .demo-media img { display: none; }
+  .demo-media video { display: none; }
   .demo-media { background: #080a0e url("/ssd-remover-demo-poster.jpg") center / cover no-repeat; }
 }

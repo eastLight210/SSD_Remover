@@ -88,9 +88,19 @@ export default function Home() {
               <span className="recording"><i /> Recorded on macOS</span>
             </figcaption>
             <div className="demo-media">
-              {/* The animated recording is the primary product proof on this page. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/ssd-remover-demo.gif" alt="SSD Remover finding a process that blocks an external drive, terminating the selected process, and ejecting the drive successfully" />
+              {/* The recording is the primary product proof on this page. */}
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                poster="/ssd-remover-demo-poster.jpg"
+                aria-label="SSD Remover finding a process that blocks an external drive, terminating the selected process, and ejecting the drive successfully"
+              >
+                <source src="/ssd-remover-demo.webm" type="video/webm" />
+                <source src="/ssd-remover-demo.mp4" type="video/mp4" />
+              </video>
             </div>
           </figure>
         </div>
