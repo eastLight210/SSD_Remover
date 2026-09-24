@@ -28,9 +28,9 @@ It automatically detects processes blocking a disk, lets you selectively termina
 
 ## Installation
 
-1. Download `SSD_Remover.zip` from the [latest release](https://github.com/eastLight210/SSD_Remover/releases/latest)
-2. Unzip the file
-3. Move `SSD_Remover.app` to the Applications folder
+1. Download `SSD_Remover.dmg` from the [latest release](https://github.com/eastLight210/SSD_Remover/releases/latest)
+2. Open it and drag `SSD_Remover.app` onto the Applications folder
+3. Launch the app from Applications (not from the disk image), then eject the disk image
 
 Later versions arrive in the app itself: it checks daily, or choose **Check for Updates…** from the `⋯` menu.
 The `ssd-remover` symlink below points into the app bundle, so it keeps working across updates.
@@ -179,8 +179,8 @@ script/test_cli_installation.sh \
 
 ## Releasing
 
-`script/release.sh <tag> --publish` builds, signs, notarizes, and uploads `SSD_Remover.zip`
-together with a Sparkle `appcast.xml`. Installed apps read
+`script/release.sh <tag> --publish` builds, signs, notarizes, and uploads `SSD_Remover.dmg`
+(for first installs) and `SSD_Remover.zip` (the Sparkle update archive) together with a Sparkle `appcast.xml`. Installed apps read
 `releases/latest/download/appcast.xml`, so publishing the release is what ships the update.
 
 - Bump both `CFBundleShortVersionString` and `CFBundleVersion`; Sparkle compares `CFBundleVersion`.

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Build a Developer ID signed, notarized, stapled SSD_Remover.zip from a git tag,
-# write the Sparkle appcast.xml for it, and optionally publish both to the
-# matching GitHub release. The app's SUFeedURL points at
+# Build a Developer ID signed, notarized, stapled SSD_Remover.zip and
+# SSD_Remover.dmg from a git tag, write the Sparkle appcast.xml for the zip, and
+# optionally publish all three to the matching GitHub release. The dmg is for
+# first installs (the landing page links to it); Sparkle updates use the zip. The app's SUFeedURL points at
 # releases/latest/download/appcast.xml, so publishing is what ships the update.
 #
 # One-time setup (stores an app-specific password in the Keychain):
@@ -48,11 +49,22 @@ OUT_DIR="$ROOT_DIR/.tmp/release/$TAG"
 DERIVED_DATA="$OUT_DIR/DerivedData"
 APP_BUNDLE="$DERIVED_DATA/Build/Products/Release/$APP_NAME.app"
 ZIP_PATH="$OUT_DIR/$APP_NAME.zip"
+DMG_PATH="$OUT_DIR/$APP_NAME.dmg"
 APPCAST_PATH="$OUT_DIR/appcast.xml"
 SPARKLE_BIN="$DERIVED_DATA/SourcePackages/artifacts/sparkle/Sparkle/bin"
 
 step() { printf '\n==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+notarize() {
+  local output submission_id
+  output="$(xcrun notarytool submit "$1" --keychain-profile "$PROFILE" --wait 2>&1)" || true
+  echo "$output"
+  if ! grep -q "status: Accepted" <<<"$output"; then
+    submission_id="$(awk '/^  id:/ { print $2; exit }' <<<"$output")"
+    [[ -n "$submission_id" ]] && xcrun notarytool log "$submission_id" --keychain-profile "$PROFILE" || true
+    die "notarization failed: $1"
+  fi
+}
 
 step "Preflight"
 git -C "$ROOT_DIR" rev-parse -q --verify "refs/tags/$TAG" >/dev/null || die "tag $TAG not found"
@@ -157,13 +169,7 @@ done < <(find "$APP_BUNDLE/Contents/Frameworks" \( -name '*.framework' -o -name 
 
 step "Notarize"
 ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
-SUBMIT_OUTPUT="$(xcrun notarytool submit "$ZIP_PATH" --keychain-profile "$PROFILE" --wait 2>&1)" || true
-echo "$SUBMIT_OUTPUT"
-if ! grep -q "status: Accepted" <<<"$SUBMIT_OUTPUT"; then
-  SUBMISSION_ID="$(awk '/^  id:/ { print $2; exit }' <<<"$SUBMIT_OUTPUT")"
-  [[ -n "$SUBMISSION_ID" ]] && xcrun notarytool log "$SUBMISSION_ID" --keychain-profile "$PROFILE" || true
-  die "notarization failed"
-fi
+notarize "$ZIP_PATH"
 
 step "Staple and repackage"
 xcrun stapler staple "$APP_BUNDLE"
@@ -176,6 +182,20 @@ ditto -x -k "$ZIP_PATH" "$CHECK_DIR"
 spctl --assess --type exec --verbose=2 "$CHECK_DIR/$APP_NAME.app"
 xcrun stapler validate "$CHECK_DIR/$APP_NAME.app"
 rm -rf "$CHECK_DIR"
+
+# Drag-to-install disk image with an Applications shortcut, containing the
+# already stapled app. The dmg itself is signed, notarized, and stapled too.
+step "Build and notarize dmg"
+DMG_STAGING="$(mktemp -d)"
+ditto "$APP_BUNDLE" "$DMG_STAGING/$APP_NAME.app"
+ln -s /Applications "$DMG_STAGING/Applications"
+hdiutil create -volname "SSD Remover" -srcfolder "$DMG_STAGING" -fs HFS+ -format UDZO -ov "$DMG_PATH" >/dev/null
+rm -rf "$DMG_STAGING"
+codesign --force --sign "$SIGN_IDENTITY" --timestamp "$DMG_PATH"
+notarize "$DMG_PATH"
+xcrun stapler staple "$DMG_PATH"
+xcrun stapler validate "$DMG_PATH"
+spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG_PATH"
 
 step "Sign update for Sparkle"
 # Prints: sparkle:edSignature="..." length="..."
@@ -215,12 +235,12 @@ write_appcast "$([[ -n "$NOTES_FILE" ]] && cat "$NOTES_FILE")"
 if [[ $PUBLISH -eq 1 ]]; then
   step "Publish to GitHub release $TAG"
   if gh release view "$TAG" >/dev/null 2>&1; then
-    gh release upload "$TAG" "$ZIP_PATH" --clobber
+    gh release upload "$TAG" "$ZIP_PATH" "$DMG_PATH" --clobber
     [[ -n "$NOTES_FILE" ]] && gh release edit "$TAG" --notes-file "$NOTES_FILE" >/dev/null
   elif [[ -n "$NOTES_FILE" ]]; then
-    gh release create "$TAG" "$ZIP_PATH" --title "$TAG" --notes-file "$NOTES_FILE"
+    gh release create "$TAG" "$ZIP_PATH" "$DMG_PATH" --title "$TAG" --notes-file "$NOTES_FILE"
   else
-    gh release create "$TAG" "$ZIP_PATH" --title "$TAG" --generate-notes
+    gh release create "$TAG" "$ZIP_PATH" "$DMG_PATH" --title "$TAG" --generate-notes
   fi
   # Embed the final release notes (possibly auto-generated) in the update alert.
   write_appcast "$(gh release view "$TAG" --json body -q .body)"
@@ -228,4 +248,4 @@ if [[ $PUBLISH -eq 1 ]]; then
   gh release view "$TAG" --json url -q .url
 fi
 
-step "Done: $ZIP_PATH, $APPCAST_PATH"
+step "Done: $ZIP_PATH, $DMG_PATH, $APPCAST_PATH"

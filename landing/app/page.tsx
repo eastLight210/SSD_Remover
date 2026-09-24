@@ -1,6 +1,6 @@
 const githubUrl = "https://github.com/eastLight210/SSD_Remover";
 // Always resolves to the newest published release asset.
-const downloadUrl = `${githubUrl}/releases/latest/download/SSD_Remover.zip`;
+const downloadUrl = `${githubUrl}/releases/latest/download/SSD_Remover.dmg`;
 
 function ArrowIcon() {
   return (
